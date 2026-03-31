@@ -1,0 +1,5 @@
+import model ALP_axff_UFO
+generate p e- > p ax e-
+display diagrams
+output DIS_aem_axem
+exit

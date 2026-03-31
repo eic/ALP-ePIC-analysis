@@ -1,0 +1,17 @@
+launch hongkai_model
+shower=OFF
+detector=OFF
+analysis=ExRoot
+0
+set nevents 10000
+set MX 0.0005
+set lpp1 1
+set lpp2 0
+set ebeam1 22880
+set ebeam2 18
+nb_proton 82
+set fixed_fac_scale2 False
+set dynamical_scale_choice 4
+set no_parton_cut
+0
+exit

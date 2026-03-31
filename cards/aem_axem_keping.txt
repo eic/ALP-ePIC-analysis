@@ -1,0 +1,25 @@
+launch aem_axem_keping
+#set ZZ 82 #default
+set nb_proton1 82 #test
+set nevents 1000
+set ma 1
+set fa 4e2
+set CaPhi 1
+set small_width_treatment 1e-20
+set lpp1 1
+set lpp2 0
+set pdlabel lhapdf
+set pdlabel1 lhapdf
+set pdlabel2 none
+set lhaid 15990
+set ebeam1 22880
+set ebeam2 18
+set fixed_fac_scale2 False
+set dynamical_scale_choice 4
+set no_parton_cut
+#set mmaa 135.66
+#set mmaamax 144.34
+set use_syst True
+set decay 9000005 auto
+0
+exit
