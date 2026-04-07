@@ -37,6 +37,7 @@
 // Header files passed as explicit arguments
 #include "MyAnalysis.h"
 #include "MyEvent.h"
+#include "MySelectionCriteria.h"
 
 // Header files passed via #pragma extra_include
 
@@ -103,7 +104,7 @@ namespace ROOT {
       ::MyEvent *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyEvent));
       static ::ROOT::TGenericClassInfo 
-         instance("MyEvent", "MyEvent.h", 56,
+         instance("MyEvent", "MyEvent.h", 61,
                   typeid(::MyEvent), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &MyEvent_Dictionary, isa_proxy, 4,
                   sizeof(::MyEvent) );
@@ -134,6 +135,51 @@ namespace ROOT {
 } // end of namespace ROOT
 
 namespace ROOT {
+   static TClass *MySelectionCriteria_Dictionary();
+   static void MySelectionCriteria_TClassManip(TClass*);
+   static void *new_MySelectionCriteria(void *p = nullptr);
+   static void *newArray_MySelectionCriteria(Long_t size, void *p);
+   static void delete_MySelectionCriteria(void *p);
+   static void deleteArray_MySelectionCriteria(void *p);
+   static void destruct_MySelectionCriteria(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::MySelectionCriteria*)
+   {
+      ::MySelectionCriteria *ptr = nullptr;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MySelectionCriteria));
+      static ::ROOT::TGenericClassInfo 
+         instance("MySelectionCriteria", "MySelectionCriteria.h", 7,
+                  typeid(::MySelectionCriteria), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &MySelectionCriteria_Dictionary, isa_proxy, 4,
+                  sizeof(::MySelectionCriteria) );
+      instance.SetNew(&new_MySelectionCriteria);
+      instance.SetNewArray(&newArray_MySelectionCriteria);
+      instance.SetDelete(&delete_MySelectionCriteria);
+      instance.SetDeleteArray(&deleteArray_MySelectionCriteria);
+      instance.SetDestructor(&destruct_MySelectionCriteria);
+      return &instance;
+   }
+   TGenericClassInfo *GenerateInitInstance(const ::MySelectionCriteria*)
+   {
+      return GenerateInitInstanceLocal(static_cast<::MySelectionCriteria*>(nullptr));
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::MySelectionCriteria*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *MySelectionCriteria_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::MySelectionCriteria*>(nullptr))->GetClass();
+      MySelectionCriteria_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void MySelectionCriteria_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
    static TClass *MyAnalysis_Dictionary();
    static void MyAnalysis_TClassManip(TClass*);
    static void *new_MyAnalysis(void *p = nullptr);
@@ -148,7 +194,7 @@ namespace ROOT {
       ::MyAnalysis *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyAnalysis));
       static ::ROOT::TGenericClassInfo 
-         instance("MyAnalysis", "MyAnalysis.h", 23,
+         instance("MyAnalysis", "MyAnalysis.h", 36,
                   typeid(::MyAnalysis), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &MyAnalysis_Dictionary, isa_proxy, 4,
                   sizeof(::MyAnalysis) );
@@ -219,6 +265,27 @@ namespace ROOT {
       (static_cast<current_t*>(p))->~current_t();
    }
 } // end of namespace ROOT for class ::MyEvent
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_MySelectionCriteria(void *p) {
+      return  p ? new(p) ::MySelectionCriteria : new ::MySelectionCriteria;
+   }
+   static void *newArray_MySelectionCriteria(Long_t nElements, void *p) {
+      return p ? new(p) ::MySelectionCriteria[nElements] : new ::MySelectionCriteria[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_MySelectionCriteria(void *p) {
+      delete (static_cast<::MySelectionCriteria*>(p));
+   }
+   static void deleteArray_MySelectionCriteria(void *p) {
+      delete [] (static_cast<::MySelectionCriteria*>(p));
+   }
+   static void destruct_MySelectionCriteria(void *p) {
+      typedef ::MySelectionCriteria current_t;
+      (static_cast<current_t*>(p))->~current_t();
+   }
+} // end of namespace ROOT for class ::MySelectionCriteria
 
 namespace ROOT {
    // Wrappers around operator new
@@ -632,6 +699,71 @@ namespace ROOT {
 } // end of namespace ROOT for class vector<edm4eic::Cluster>
 
 namespace ROOT {
+   static TClass *vectorlEMySelectionCriteriagR_Dictionary();
+   static void vectorlEMySelectionCriteriagR_TClassManip(TClass*);
+   static void *new_vectorlEMySelectionCriteriagR(void *p = nullptr);
+   static void *newArray_vectorlEMySelectionCriteriagR(Long_t size, void *p);
+   static void delete_vectorlEMySelectionCriteriagR(void *p);
+   static void deleteArray_vectorlEMySelectionCriteriagR(void *p);
+   static void destruct_vectorlEMySelectionCriteriagR(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<MySelectionCriteria>*)
+   {
+      vector<MySelectionCriteria> *ptr = nullptr;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<MySelectionCriteria>));
+      static ::ROOT::TGenericClassInfo 
+         instance("vector<MySelectionCriteria>", -2, "vector", 428,
+                  typeid(vector<MySelectionCriteria>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &vectorlEMySelectionCriteriagR_Dictionary, isa_proxy, 4,
+                  sizeof(vector<MySelectionCriteria>) );
+      instance.SetNew(&new_vectorlEMySelectionCriteriagR);
+      instance.SetNewArray(&newArray_vectorlEMySelectionCriteriagR);
+      instance.SetDelete(&delete_vectorlEMySelectionCriteriagR);
+      instance.SetDeleteArray(&deleteArray_vectorlEMySelectionCriteriagR);
+      instance.SetDestructor(&destruct_vectorlEMySelectionCriteriagR);
+      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<MySelectionCriteria> >()));
+
+      instance.AdoptAlternate(::ROOT::AddClassAlternate("vector<MySelectionCriteria>","std::vector<MySelectionCriteria, std::allocator<MySelectionCriteria> >"));
+      return &instance;
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const vector<MySelectionCriteria>*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *vectorlEMySelectionCriteriagR_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const vector<MySelectionCriteria>*>(nullptr))->GetClass();
+      vectorlEMySelectionCriteriagR_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void vectorlEMySelectionCriteriagR_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_vectorlEMySelectionCriteriagR(void *p) {
+      return  p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<MySelectionCriteria> : new vector<MySelectionCriteria>;
+   }
+   static void *newArray_vectorlEMySelectionCriteriagR(Long_t nElements, void *p) {
+      return p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<MySelectionCriteria>[nElements] : new vector<MySelectionCriteria>[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_vectorlEMySelectionCriteriagR(void *p) {
+      delete (static_cast<vector<MySelectionCriteria>*>(p));
+   }
+   static void deleteArray_vectorlEMySelectionCriteriagR(void *p) {
+      delete [] (static_cast<vector<MySelectionCriteria>*>(p));
+   }
+   static void destruct_vectorlEMySelectionCriteriagR(void *p) {
+      typedef vector<MySelectionCriteria> current_t;
+      (static_cast<current_t*>(p))->~current_t();
+   }
+} // end of namespace ROOT for class vector<MySelectionCriteria>
+
+namespace ROOT {
    static TClass *vectorlEMyParticlegR_Dictionary();
    static void vectorlEMyParticlegR_TClassManip(TClass*);
    static void *new_vectorlEMyParticlegR(void *p = nullptr);
@@ -968,6 +1100,7 @@ namespace {
     static const char* headers[] = {
 "MyAnalysis.h",
 "MyEvent.h",
+"MySelectionCriteria.h",
 nullptr
     };
     static const char* includePaths[] = {
@@ -989,6 +1122,7 @@ extern int __Cling_AutoLoading_Map;
 class  __attribute__((annotate("$clingAutoload$MyEvent.h")))  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MyParticle;
 namespace std{template <typename _Tp> class  __attribute__((annotate("$clingAutoload$bits/allocator.h")))  __attribute__((annotate("$clingAutoload$string")))  allocator;
 }
+class  __attribute__((annotate("$clingAutoload$MySelectionCriteria.h")))  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MySelectionCriteria;
 class  __attribute__((annotate("$clingAutoload$MyEvent.h")))  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MyEvent;
 class  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MyAnalysis;
 #pragma diagnostic pop
@@ -1001,6 +1135,7 @@ class  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MyAnalysis;
 // Inline headers
 #include "MyAnalysis.h"
 #include "MyEvent.h"
+#include "MySelectionCriteria.h"
 
 #undef  _BACKWARD_BACKWARD_WARNING_H
 )DICTPAYLOAD";
@@ -1008,6 +1143,7 @@ class  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MyAnalysis;
 "MyAnalysis", payloadCode, "@",
 "MyEvent", payloadCode, "@",
 "MyParticle", payloadCode, "@",
+"MySelectionCriteria", payloadCode, "@",
 nullptr
 };
     static bool isInitialized = false;

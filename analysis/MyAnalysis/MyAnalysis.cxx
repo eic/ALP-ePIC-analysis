@@ -30,7 +30,6 @@ MyAnalysis::MyAnalysis(string ifname, string ofname)
 // *****************************************************************************
 MyAnalysis::~MyAnalysis()
 {
-    //delete mFrame;
     delete mReader;
     delete mOutFile;
     delete ev;
@@ -65,6 +64,8 @@ bool MyAnalysis::Init()
     nev = 0;
     ev = new MyEvent();
 
+    cuts.LoadDefault();
+
     return true;
 }
 
@@ -83,9 +84,19 @@ bool MyAnalysis::Next()
 
     ev->Clear();
     ev->id = nev;
-    mFrame = podio::Frame(mReader->readNextEntry(podio::Category::Event));
+    frame = podio::Frame(mReader->readNextEntry(podio::Category::Event));
 
     ReadPODIO();
+    TrackClusterMatching();
+
+    // Your Analysis begins here
+    AnalyzeQA();
+    AnalyzeEfficiency();
+    AnalyzeResolution();
+    AnalyzeMatching();
+    AnalyzeDecayVertex();
+
+    // Your Analysis ends here
 
     return true;
 }

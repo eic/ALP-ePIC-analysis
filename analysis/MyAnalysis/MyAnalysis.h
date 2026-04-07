@@ -1,3 +1,15 @@
+// *****************************************************************************
+// MyAnalysis.h
+// Jae Nam, jnam@bnl.gov
+// Analysis framework for ALP@ePIC studies.
+// Expects a PODIO file from EICRecon with ePIC geometry as input.
+// It returns (currently) root file containing analysis histograms,
+// and (eventually) root tree file with ALP events.
+// v0.20260331
+// Right now this analysis (efficiency, resolution/smearing, cluster matching) rely on truth-matching of the scatter lepton.
+// This needs to be updated once a robust lepton identification strategy is developed.
+// *****************************************************************************
+
 #ifndef MYANALYSIS
 #define MYANALYSIS
 
@@ -24,22 +36,31 @@ using namespace std;
 class MyAnalysis
 {
 private:
+    // IO
     string mInFileName;
     string mOutFileName;
     podio::ROOTReader* mReader;
-    podio::Frame mFrame;
     TFile* mOutFile;
 
 public:
-    unsigned int nev;
+    // Event Instances
+    podio::Frame frame;
     MyEvent* ev;
+    unsigned int nev;
+
+    uint32_t collectionID_BEMC;
+    uint32_t collectionID_NEMC;
+    uint32_t collectionID_PEMC;
+
+
+    // Selection Cuts
+    // MySelectionCriteria.h
+    MySelectionCriteria cuts;
+
+    // Histograms
     map<string,TH1*> h1;
     map<string,TH2*> h2;
     map<string,TH3*> h3;
-
-    // MySelectionCriteria.cxx (WIP)
-    MySelectionCriteria cuts;
-    
 
 public:
     MyAnalysis();
@@ -57,8 +78,16 @@ private:
 
     // MyAnalysisReadPODIO.cxx
     bool ReadPODIO();
-    map<unsigned int, vector<edm4eic::TrackPoint>> TrackPointMap(const edm4eic::TrackSegmentCollection& projections);
-    map<unsigned int, vector<edm4eic::Cluster>> ClusterMap(const edm4eic::MCRecoClusterParticleAssociationCollection& associations);
+
+    // MyAnalysisReconstruction.cxx
+    bool TrackClusterMatching();
+
+    // MyAnalysisCollection.cxx
+    void AnalyzeQA();
+    void AnalyzeEfficiency();
+    void AnalyzeResolution();
+    void AnalyzeMatching();
+    void AnalyzeDecayVertex();
 
 };
 

@@ -4,6 +4,19 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
+################################################################################
+# TO BE removed
+oldpath="$(pwd)"
+newpath="$(cd ""$(dirname "${BASH_SOURCE[0]}")"/.." && pwd)"
+cd $newpath
+make clean
+make
+cd $oldpath
+
+read -n 1 -s -r -p "Press any key to continue..."
+echo # Add a newline after the key is pressed
+################################################################################
+
 infile=$1
 outfile=$2
 
