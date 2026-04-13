@@ -23,14 +23,27 @@ class MyParticle
 public:
     edm4hep::MCParticle sim;
     edm4eic::ReconstructedParticle rec;
-    vector<edm4eic::Cluster> clusters;
+    edm4eic::Track track; // CentralCKFTracks
+    vector<edm4eic::TrackPoint> projection; // Projection for CentralCKFTracks
     vector<edm4eic::Track> tracks;
     vector<vector<edm4eic::TrackPoint>> points; // for projection
 
+    // EMC
+    vector<edm4eic::Cluster> clusters;
     edm4eic::Cluster cluster_high;
+    edm4eic::Cluster cluster_near;
     TVector3 pos_cluster_sum;
     float ene_cluster_sum;
     TVector3 pos_track;
+
+    // HCal
+    vector<edm4eic::Cluster> hclusters;
+    edm4eic::Cluster hcluster_high;
+    edm4eic::Cluster hcluster_near;
+    TVector3 pos_hcluster_sum;
+    float ene_hcluster_sum;
+    TVector3 pos_track_hcal;
+
 
     MyParticle()
     {
@@ -46,13 +59,25 @@ public:
     {
         sim = edm4hep::MCParticle();
         rec = edm4eic::ReconstructedParticle();
-        clusters.clear();
+        track = edm4eic::Track();
+        projection.clear();
         tracks.clear();
         points.clear();
+
+
+        clusters.clear();
         cluster_high = edm4eic::Cluster();
+        cluster_near = edm4eic::Cluster();
         pos_cluster_sum = TVector3(0,0,0);
         ene_cluster_sum = 0;
         pos_track = TVector3(0,0,0);
+
+        hclusters.clear();
+        hcluster_high = edm4eic::Cluster();
+        hcluster_near = edm4eic::Cluster();
+        pos_hcluster_sum = TVector3(0,0,0);
+        ene_hcluster_sum = 0;
+        pos_track_hcal = TVector3(0,0,0);
     }
 };
 
@@ -65,12 +90,17 @@ public:
     uint32_t collectionID_BEMC; // Should move to MyAnalysis eventually
     uint32_t collectionID_NEMC; // Should move to MyAnalysis eventually
     uint32_t collectionID_PEMC; // Should move to MyAnalysis eventually
-    int nmatches; // cluster-track matching
+    uint32_t collectionID_BHCal; // Should move to MyAnalysis eventually
+    uint32_t collectionID_NHCal; // Should move to MyAnalysis eventually
+    uint32_t collectionID_PHCal; // Should move to MyAnalysis eventually
+    int nmatches; // cluster-track matching (EMC)
+    int nmatches_hcal; // cluster-track matching (HCal)
 
     vector<MyParticle> particles; // particles with sim-rec association
     vector<edm4hep::MCParticle> particles_sim; // all simulated particle
     vector<edm4eic::ReconstructedParticle> particles_rec; // all reconstructed particle
-    vector<edm4eic::Cluster> clusters; // all clusters
+    vector<edm4eic::Cluster> clusters; // all EMC clusters
+    vector<edm4eic::Cluster> hclusters; // all HCal clusters
 
     MyEvent()
     {
@@ -93,6 +123,7 @@ public:
         particles_rec.clear();
         particles.clear();
         clusters.clear();
+        hclusters.clear();
     }
 
     edm4eic::ReconstructedParticle GetFinalLepton()
@@ -148,6 +179,14 @@ public:
     void Print();
 };
 
+
+
+
+
+
+
+
+
 inline void MyEvent::Print()
 {
     int ww = 15;
@@ -159,7 +198,7 @@ inline void MyEvent::Print()
         auto par = particles_sim[i];
         TVector3 p(par.getMomentum().x, par.getMomentum().y, par.getMomentum().z);
         int mother1 = par.parents_size() > 0 ? par.getParents()[0].getObjectID().index : -9999;
-        int mother2 = par.parents_size() > 0 ? par.getParents()[1].getObjectID().index : -9999;
+        int mother2 = par.parents_size() > 1 ? par.getParents()[1].getObjectID().index : -9999;
         if (i == 0) cout << setw(ww) << "i" << setw(ww) << "stat" << setw(ww) << "mother1" << setw(ww) << "mother2" << setw(ww) << "pdg" << setw(ww) << "pt" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
         cout << setw(ww) << i << setw(ww) << par.getGeneratorStatus() << setw(ww) << mother1 << setw(ww) << mother2 << setw(ww) << par.getPDG() << setw(ww) << p.Pt() << setw(ww) << p.Eta() << setw(ww) << p.Phi() << endl;
     }
@@ -173,7 +212,31 @@ inline void MyEvent::Print()
         cout << setw(ww) << i << setw(ww) << par.getPDG() << setw(ww) << p.Pt() << setw(ww) << p.Eta() << setw(ww) << p.Phi() << endl;
     }
 
-    if (clusters.size() > 0) cout << " - Cluster List:" << endl;
+    if (particles.size() > 0) cout << " - TrackPoint List:" << endl;
+    for (unsigned int i = 0; i < particles.size(); ++i)
+    {
+        auto par = particles[i];
+        auto rec = particles[i].rec;
+        TVector3 p(rec.getMomentum().x, rec.getMomentum().y, rec.getMomentum().z);
+        if (par.points.size() == 0) continue;
+        for (unsigned int j = 0; j < par.points.size(); j++)
+        {
+            for (unsigned int k = 0; k < par.points[j].size(); k++)
+            {
+                auto pts = par.points[j][k];
+                TVector3 pos(pts.position.x, pts.position.y, pts.position.z);
+                if (i == 0 && j == 0 && k == 0) cout << setw(ww) << "i" << setw(ww) << "j" << setw(ww) << "k" << setw(ww) << "pdg" << setw(ww) << "pT/R" << setw(ww) << "pZ/z" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
+                if (j == 0 && k == 0) cout << setw(ww) << i << setw(ww) << "" << setw(ww) << "" << setw(ww) << par.rec.getPDG() << setw(ww) << p.Pt() << setw(ww) << p.Pz() << setw(ww) << p.Eta() << setw(ww) << p.Phi() << endl;
+                cout << setw(ww) << i << setw(ww) << j << setw(ww) << k << setw(ww) << "" << setw(ww) << pos.Perp() << setw(ww) << pos.Z() << setw(ww) << pos.Eta() << setw(ww) << pos.Phi() << endl;
+            }
+        }
+
+    }
+
+
+
+
+    if (clusters.size() > 0) cout << " - EMC Cluster List:" << endl;
     for (unsigned int i = 0; i < clusters.size(); ++i)
     {
         auto c = clusters[i];
@@ -185,6 +248,20 @@ inline void MyEvent::Print()
         if (i == 0) cout << setw(ww) << "i" << setw(ww) << "type" << setw(ww) << "index" << setw(ww) << "energy" << setw(ww) << "radius" << setw(ww) << "z" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
         cout << setw(ww) << i << setw(ww) << type << setw(ww) << c.getObjectID().index << setw(ww) << c.getEnergy() << setw(ww) << pos.Perp() << setw(ww) << pos.Z() << setw(ww) << pos.Eta() << setw(ww) << pos.Phi() << endl;
     }
+
+    if (hclusters.size() > 0) cout << " - HCal Cluster List:" << endl;
+    for (unsigned int i = 0; i < hclusters.size(); ++i)
+    {
+        auto c = hclusters[i];
+        string type = "";
+        if (c.getObjectID().collectionID == collectionID_BHCal) type = "BHCal";
+        if (c.getObjectID().collectionID == collectionID_NHCal) type = "NHCal";
+        if (c.getObjectID().collectionID == collectionID_PHCal) type = "PHCal";
+        TVector3 pos(c.getPosition().x, c.getPosition().y, c.getPosition().z);
+        if (i == 0) cout << setw(ww) << "i" << setw(ww) << "type" << setw(ww) << "index" << setw(ww) << "energy" << setw(ww) << "radius" << setw(ww) << "z" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
+        cout << setw(ww) << i << setw(ww) << type << setw(ww) << c.getObjectID().index << setw(ww) << c.getEnergy() << setw(ww) << pos.Perp() << setw(ww) << pos.Z() << setw(ww) << pos.Eta() << setw(ww) << pos.Phi() << endl;
+    }
+
 
     if (nmatches > 0)
     {

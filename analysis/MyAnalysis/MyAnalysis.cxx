@@ -42,7 +42,8 @@ bool MyAnalysis::Run()
     while (Next())
     {
         if (nev % 100 == 0) cout << nev << " events processed..." << endl;
-        if (ev->particles.size() > 0) ev->Print();
+        //if (ev->particles.size() > 0) ev->Print();
+        //if (ev->nmatches > 0) ev->Print();
 
         nev++;
     }
@@ -66,6 +67,13 @@ bool MyAnalysis::Init()
 
     cuts.LoadDefault();
 
+    collectionID_BEMC = 0;
+    collectionID_NEMC = 0;
+    collectionID_PEMC = 0;
+    collectionID_BHCal = 0;
+    collectionID_NHCal = 0;
+    collectionID_PHCal = 0;
+
     return true;
 }
 
@@ -88,6 +96,7 @@ bool MyAnalysis::Next()
 
     ReadPODIO();
     TrackClusterMatching();
+    TrackHCalClusterMatching();
 
     // Your Analysis begins here
     AnalyzeQA();
@@ -96,6 +105,7 @@ bool MyAnalysis::Next()
     AnalyzeMatching();
     AnalyzeDecayVertex();
 
+    AnalyzeElectronIdentification();
     // Your Analysis ends here
 
     return true;

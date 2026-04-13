@@ -1,31 +1,28 @@
 #!/bin/bash
-if [ "$#" -ne 2 ]; then
-    echo "Usage: bash run_analysis.sh <input_file> <output_file>"
-    exit 1
-fi
-
-################################################################################
-# TO BE removed
-oldpath="$(pwd)"
-newpath="$(cd ""$(dirname "${BASH_SOURCE[0]}")"/.." && pwd)"
-cd $newpath
-make clean
-make
-cd $oldpath
-
-read -n 1 -s -r -p "Press any key to continue..."
-echo # Add a newline after the key is pressed
-################################################################################
-
+script="/gpfs/mnt/gpfs02/eic/namjae/madgraph/analysis/scripts/run_analysis.sh"
 infile=$1
 outfile=$2
+remake=$3
 
-BASE_DIR="$(cd ""$(dirname "${BASH_SOURCE[0]}")"/.." && pwd)"
-LIB_DIR="${BASE_DIR}/lib"
-MACRO_DIR="${BASE_DIR}/macros"
-INC_DIR="${BASE_DIR}/MyAnalysis"
 
-export LD_LIBRARY_PATH="${LIB_DIR}:${LD_LIBRARY_PATH}"
-export ROOT_INCLUDE_PATH="${INC_DIR}:${ROOT_INCLUDE_PATH}"
+if [[ "$#" -lt 2 || "$#" -gt 3 ]]; then
+    echo "Usage: bash test.sh <input_file> <output_file>"
+    echo "Usage: bash test.sh <input_file> <output_file> <recompile_library>"
+fi
 
-root -l -b -q -e 'gSystem->Load("libMyAnalysis.so");' "${MACRO_DIR}/analysis.C(\"${infile}\", \"${outfile}\")"
+if [ "$#" -eq 2 ]; then
+    remake=1
+fi
+
+if [ "$remake" -eq 1 ]; then
+    oldpath="$(pwd)"
+    newpath="$(cd ""$(dirname "${BASH_SOURCE[0]}")"/.." && pwd)"
+    cd $newpath
+    make clean
+    make
+    cd $oldpath
+fi
+
+read -n 1 -s -r -p "Press any key to continue..."
+
+$script $infile $outfile

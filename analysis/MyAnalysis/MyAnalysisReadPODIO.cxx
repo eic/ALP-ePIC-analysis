@@ -1,5 +1,6 @@
 #include <edm4hep/MCParticleCollection.h>
 
+#include <edm4eic/TrackCollection.h>
 #include <edm4eic/ClusterCollection.h>
 #include <edm4eic/ReconstructedParticleCollection.h>
 #include <edm4eic/MCRecoParticleAssociationCollection.h>
@@ -20,11 +21,18 @@ bool MyAnalysis::ReadPODIO()
     auto& particles_sim = frame.get<edm4hep::MCParticleCollection>("MCParticles");
     auto& associations = frame.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedChargedParticleAssociations");
 
+    auto collectionID_CKF = frame.get<edm4eic::TrackCollection>("CentralCKFTracks").getID();
+
     auto& clusters_BEMC = frame.get<edm4eic::ClusterCollection>("EcalBarrelClusters");
     auto& clusters_NEMC = frame.get<edm4eic::ClusterCollection>("EcalEndcapNClusters");
     auto& clusters_PEMC = frame.get<edm4eic::ClusterCollection>("EcalEndcapPClusters");
 
-    // Keeping two different copies of cluster collection ID for ev->Print()...
+    auto& clusters_BHCal = frame.get<edm4eic::ClusterCollection>("HcalBarrelClusters");
+    auto& clusters_NHCal = frame.get<edm4eic::ClusterCollection>("HcalEndcapNClusters");
+    auto& clusters_PHCal = frame.get<edm4eic::ClusterCollection>("LFHCALClusters");
+
+    // Temporarily keeping two different copies of cluster collection ID for ev->Print()...
+    // Don't wanna do friends...
     ev->collectionID_BEMC = clusters_BEMC.getID();
     ev->collectionID_NEMC = clusters_NEMC.getID();
     ev->collectionID_PEMC = clusters_PEMC.getID();
@@ -32,11 +40,22 @@ bool MyAnalysis::ReadPODIO()
     collectionID_NEMC = clusters_NEMC.getID();
     collectionID_PEMC = clusters_PEMC.getID();
 
+    ev->collectionID_BHCal = clusters_BHCal.getID();
+    ev->collectionID_NHCal = clusters_NHCal.getID();
+    ev->collectionID_PHCal = clusters_PHCal.getID();
+    collectionID_BHCal = clusters_BHCal.getID();
+    collectionID_NHCal = clusters_NHCal.getID();
+    collectionID_PHCal = clusters_PHCal.getID();
+
 
     auto mapTrackPoint = trackpoint_mapping(frame.get<edm4eic::TrackSegmentCollection>("CalorimeterTrackProjections"));
     auto mapBEMC = cluster_mapping(frame.get<edm4eic::MCRecoClusterParticleAssociationCollection>("EcalBarrelClusterAssociations"));
     auto mapNEMC = cluster_mapping(frame.get<edm4eic::MCRecoClusterParticleAssociationCollection>("EcalEndcapNClusterAssociations"));
     auto mapPEMC = cluster_mapping(frame.get<edm4eic::MCRecoClusterParticleAssociationCollection>("EcalEndcapPClusterAssociations"));
+
+    auto mapBHCal = cluster_mapping(frame.get<edm4eic::MCRecoClusterParticleAssociationCollection>("HcalBarrelClusterAssociations"));
+    auto mapNHCal = cluster_mapping(frame.get<edm4eic::MCRecoClusterParticleAssociationCollection>("HcalEndcapNClusterAssociations"));
+    auto mapPHCal = cluster_mapping(frame.get<edm4eic::MCRecoClusterParticleAssociationCollection>("LFHCALClusterAssociations"));
 
     // MC Particles loop
     for (auto par : particles_sim) ev->particles_sim.push_back(par);
@@ -47,6 +66,10 @@ bool MyAnalysis::ReadPODIO()
     for (auto cluster : clusters_BEMC) ev->clusters.push_back(cluster);
     for (auto cluster : clusters_NEMC) ev->clusters.push_back(cluster);
     for (auto cluster : clusters_PEMC) ev->clusters.push_back(cluster);
+
+    for (auto cluster : clusters_BHCal) ev->hclusters.push_back(cluster);
+    for (auto cluster : clusters_NHCal) ev->hclusters.push_back(cluster);
+    for (auto cluster : clusters_PHCal) ev->hclusters.push_back(cluster);
 
     // Association Loop
     for (auto asso : associations)
@@ -60,10 +83,17 @@ bool MyAnalysis::ReadPODIO()
         // Fill Track info
         for (unsigned int i = 0; i < par.rec.tracks_size(); ++i)
         {
+            if (par.rec.getTracks(i).getObjectID().collectionID == collectionID_CKF) par.track = par.rec.getTracks(i);
+            auto idtrk = par.track.getObjectID().index;
+            if (mapTrackPoint.count(idtrk))
+            {
+                par.projection.clear();
+                const auto& points = mapTrackPoint[idtrk];
+                par.projection.insert(par.projection.end(),points.begin(),points.end());
+            }
+
             par.tracks.push_back(par.rec.getTracks(i));
             par.points.push_back({});
-            unsigned int idtrk = par.tracks[i].getObjectID().index;
-
             if (mapTrackPoint.count(idtrk))
             {
                 const auto& points = mapTrackPoint[idtrk];
@@ -76,6 +106,11 @@ bool MyAnalysis::ReadPODIO()
         if (mapBEMC.count(idsim)) par.clusters.insert(par.clusters.end(), mapBEMC.at(idsim).begin(), mapBEMC.at(idsim).end());
         if (mapNEMC.count(idsim)) par.clusters.insert(par.clusters.end(), mapNEMC.at(idsim).begin(), mapNEMC.at(idsim).end());
         if (mapPEMC.count(idsim)) par.clusters.insert(par.clusters.end(), mapPEMC.at(idsim).begin(), mapPEMC.at(idsim).end());
+
+        par.hclusters.clear();
+        if (mapBHCal.count(idsim)) par.hclusters.insert(par.hclusters.end(), mapBHCal.at(idsim).begin(), mapBHCal.at(idsim).end());
+        if (mapNHCal.count(idsim)) par.hclusters.insert(par.hclusters.end(), mapNHCal.at(idsim).begin(), mapNHCal.at(idsim).end());
+        if (mapPHCal.count(idsim)) par.hclusters.insert(par.hclusters.end(), mapPHCal.at(idsim).begin(), mapPHCal.at(idsim).end());
 
         // Fill Event
         ev->particles.push_back(par);

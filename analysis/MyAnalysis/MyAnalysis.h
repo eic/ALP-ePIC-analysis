@@ -48,10 +48,13 @@ public:
     MyEvent* ev;
     unsigned int nev;
 
+    // Calorimeter ID
     uint32_t collectionID_BEMC;
     uint32_t collectionID_NEMC;
     uint32_t collectionID_PEMC;
-
+    uint32_t collectionID_BHCal;
+    uint32_t collectionID_NHCal;
+    uint32_t collectionID_PHCal;
 
     // Selection Cuts
     // MySelectionCriteria.h
@@ -80,7 +83,8 @@ private:
     bool ReadPODIO();
 
     // MyAnalysisReconstruction.cxx
-    bool TrackClusterMatching();
+    bool TrackClusterMatching(); // EMC
+    bool TrackHCalClusterMatching(); // HCAL
 
     // MyAnalysisCollection.cxx
     void AnalyzeQA();
@@ -88,6 +92,8 @@ private:
     void AnalyzeResolution();
     void AnalyzeMatching();
     void AnalyzeDecayVertex();
+
+    void AnalyzeElectronIdentification();
 
 };
 

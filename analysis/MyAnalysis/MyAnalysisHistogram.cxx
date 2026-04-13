@@ -5,7 +5,8 @@ vector<float> binning(int nbins, float x1, float x2);
 void reserve_qa_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
 void reserve_eff_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
 void reserve_res_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
-void reserve_matching_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
+void reserve_match_EMC_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
+void reserve_cluster_QA_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
 
 // *****************************************************************************
 vector<float> pTbins = binning(100, 0, 5);
@@ -16,6 +17,9 @@ vector<float> etabins_coarse = binning(20, -10, 10);
 
 vector<float> pbins = binning(100, 0, 10);
 vector<float> dRbins = binning(100, 0, 0.1);
+vector<float> sdRbins = binning(100, -0.1, 0.1);
+vector<float> dRbins_wide = binning(100, 0, 2.0);
+vector<float> sdRbins_wide = binning(100, -2.0, 2.0);
 vector<float> ecalbins = binning(5, 0, 5);
 
 vector<float> sbins = binning(10, 0, 10);
@@ -38,7 +42,8 @@ void MyAnalysis::ReserveHistograms()
     reserve_qa_histograms(h1, h2, h3);
     reserve_eff_histograms(h1, h2, h3);
     reserve_res_histograms(h1, h2, h3);
-    reserve_matching_histograms(h1, h2, h3);
+    reserve_match_EMC_histograms(h1, h2, h3);
+    reserve_cluster_QA_histograms(h1, h2, h3);
 
     for (map<string,TH1*>::const_iterator itr = h1.begin(); itr != h1.end(); ++itr) itr->second->Sumw2();
     for (map<string,TH2*>::const_iterator itr = h2.begin(); itr != h2.end(); ++itr) itr->second->Sumw2();
@@ -46,28 +51,92 @@ void MyAnalysis::ReserveHistograms()
 }
 
 // *****************************************************************************
+void reserve_cluster_QA_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3)
+{
+    //vector<float> rbins_becal = {};
+    vector<float> zbins_necal = binning(108, -4200, -1500);
+    //vector<float> zbins_pecal = binning();
+
+
+}
+
+
 
 // *****************************************************************************
-void reserve_matching_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3)
+void reserve_match_EMC_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3)
 {
-    h2["Match__nclspertrk_det"] = new TH2F("Match__nclspertrk_det", ";N_{cluster}/Track", 10, 0, 10, 5, 0, 5);
-    h2["Match__E_det"] = new TH2F("Match__E_det", ";E_{cluster} (GeV)", pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
-    h2["Match__Etot_det"] = new TH2F("Match__Etot_det", ";#SigmaE_{cluster} (GeV)/Track", pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
-    h3["Match__eta_phi_det"] = new TH3F("Match__eta_phi_det", ";#eta_{cluster};#phi_{cluster}", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], ecalbins.size() - 1, &ecalbins[0]);
-    h3["Match__eta_E_det"] = new TH3F("Match__eta_E_det", ";#eta_{cluster};E_{cluster}", etabins.size() - 1, &etabins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+    vector<string> prefixes = {"Match_ECAL_", "Match_HCAL_"};
+    for (int itype = 0; itype < prefixes.size(); ++itype)
+    {
+        string prefix = prefixes[itype];
+        vector<float> temp_dRbins;
+        vector<float> temp_sdRbins;
 
-    h2["Match__dR_det"] = new TH2F("Match__dR_det", ";#DeltaR_{trk,high-cluster} (mm)", dRbins.size() - 1, &dRbins[0], ecalbins.size() - 1, &ecalbins[0]);
-    h2["Match__dRtot_det"] = new TH2F("Match__dRtot_det", ";#DeltaR_{trk,sum-cluster} (mm)", dRbins.size() - 1, &dRbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        if (itype == 0)
+        {
+            temp_dRbins = dRbins;
+            temp_sdRbins = sdRbins;
+        }
+        else
+        {
+            temp_dRbins = dRbins_wide;
+            temp_sdRbins = sdRbins_wide;
+        }
 
-    h3["Match_electron__p_E_det"] = new TH3F("Match_electron__p_E_det", ";p_{e} (GeV);high-E_{cluster} (GeV)", pbins.size() - 1, &pbins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
-    h3["Match_electron__p_Etot_det"] = new TH3F("Match_electron__p_Etot_det", ";p_{e} (GeV);#SigmaE_{cluster} (GeV)", pbins.size() - 1, &pbins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
-    h3["Match_electron__p_Ep_det"] = new TH3F("Match_electron__p_Ep_det", ";p_{e} (GeV);high-E_{cluster}/p_{e}", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], ecalbins.size() - 1, &ecalbins[0]);
-    h3["Match_electron__p_Eptot_det"] = new TH3F("Match_electron__p_Eptot_det", ";p_{e} (GeV);#SigmaE_{cluster}/p_{e}", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h2[prefix + "track__nclusters_det"] = new TH2F(TString(prefix + "track__nclusters_det"), ";N_{cluster}/Track", 10, 0, 10, ecalbins.size() - 1, ecalbins[0], ecalbins.back());
 
-    h3["Match_all__p_E_det"] = new TH3F("Match_all__p_E_det", ";p (GeV);high-E_{cluster} (GeV)", pbins.size() - 1, &pbins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
-    h3["Match_all__p_Etot_det"] = new TH3F("Match_all__p_Etot_det", ";p (GeV);#SigmaE_{cluster} (GeV)", pbins.size() - 1, &pbins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
-    h3["Match_all__p_Ep_det"] = new TH3F("Match_all__p_Ep_det", ";p (GeV);high-E_{cluster}/p", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], ecalbins.size() - 1, &ecalbins[0]);
-    h3["Match_all__p_Eptot_det"] = new TH3F("Match_all__p_Eptot_det", ";p (GeV);#SigmaE_{cluster}/p", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "track__nclusters_E_det"] = new TH3F(TString(prefix + "track__nclusters_E_det"), ";N_{cluster}/Track;E_{cluster} (GeV)", 10, 0, 10, pbins.size() - 1, pbins[0], pbins.back(), ecalbins.size() - 1, ecalbins[0], ecalbins.back());
+        h3[prefix + "track__nclusters_deta_det"] = new TH3F(TString(prefix + "track__nclusters_deta_det"), ";N_{cluster}/Track;#Delta#eta_{trk,cls}", 10, 0, 10, temp_sdRbins.size() - 1, temp_sdRbins[0], temp_sdRbins.back(), ecalbins.size() - 1, ecalbins[0], ecalbins.back());
+        h3[prefix + "track__nclusters_dphi_det"] = new TH3F(TString(prefix + "track__nclusters_dphi_det"), ";N_{cluster}/Track;#Delta#phi_{trk,cls}", 10, 0, 10, temp_sdRbins.size() - 1, temp_sdRbins[0], temp_sdRbins.back(), ecalbins.size() - 1, ecalbins[0], ecalbins.back());
+        h3[prefix + "track__nclusters_dR_det"] = new TH3F(TString(prefix + "track__nclusters_dR_det"), ";N_{cluster}/Track;#DeltaR_{trk,cls}", 10, 0, 10, temp_dRbins.size() - 1, temp_dRbins[0], temp_dRbins.back(), ecalbins.size() - 1, ecalbins[0], ecalbins.back());
+
+        h2[prefix + "track__p_det"] = new TH2F(TString(prefix + "track__p_det"), ";p_{trk} OR E_{cls} (GeV)", pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "track__eta_phi_det"] = new TH3F(TString(prefix + "track__eta_phi_det"), ";#eta_{trk,pos};#phi_{trk,pos}", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "track__eta_p_det"] = new TH3F(TString(prefix + "track__eta_p_det"), ";#eta_{trk,pos};p_{trk} OR E_{cls} (GeV)", etabins.size() - 1, &etabins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+
+        h2[prefix + "track_all__p_det"] = new TH2F(TString(prefix + "track_all__p_det"), ";p_{trk} OR E_{cls} (GeV)", pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "track_all__eta_phi_det"] = new TH3F(TString(prefix + "track_all__eta_phi_det"), ";#eta_{trk,pos};#phi_{trk,pos}", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "track_all__eta_p_det"] = new TH3F(TString(prefix + "track_all__eta_p_det"), ";#eta_{trk,pos};p_{trk} OR E_{cls} (GeV)", etabins.size() - 1, &etabins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+
+        h2[prefix + "cluster_high__E_det"] = new TH2F(TString(prefix + "cluster_high__E_det"), ";E_{high-cluster} (GeV)", pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h2[prefix + "cluster_high__dR_det"] = new TH2F(TString(prefix + "cluster_high__dR_det"), ";#DeltaR_{trk,high-cluster}", temp_dRbins.size() - 1, &temp_dRbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h2[prefix + "cluster_high__deta_det"] = new TH2F(TString(prefix + "cluster_high__deta_det"), ";#Delta#eta_{trk,high-cluster}", temp_sdRbins.size() - 1, &temp_sdRbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h2[prefix + "cluster_high__dphi_det"] = new TH2F(TString(prefix + "cluster_high__dphi_det"), ";#Delta#phi_{trk,near-cluster}", temp_sdRbins.size() - 1, &temp_sdRbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "cluster_high__eta_phi_det"] = new TH3F(TString(prefix + "cluster_high__eta_phi_det"), ";#eta_{high-cluster};#phi_{high-cluster}", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "cluster_high__eta_E_det"] = new TH3F(TString(prefix + "cluster_high__eta_E_det"), ";#eta_{high-cluster};E_{high-cluster}", etabins.size() - 1, &etabins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+
+        h2[prefix + "cluster_near__E_det"] = new TH2F(TString(prefix + "cluster_near__E_det"), ";E_{near-cluster} (GeV)", pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h2[prefix + "cluster_near__dR_det"] = new TH2F(TString(prefix + "cluster_near__dR_det"), ";#DeltaR_{trk,near-cluster}", temp_dRbins.size() - 1, &temp_dRbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h2[prefix + "cluster_near__deta_det"] = new TH2F(TString(prefix + "cluster_near__deta_det"), ";#Delta#eta_{trk,near-cluster}", temp_sdRbins.size() - 1, &temp_sdRbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h2[prefix + "cluster_near__dphi_det"] = new TH2F(TString(prefix + "cluster_near__dphi_det"), ";#Delta#phi_{trk,near-cluster}", temp_sdRbins.size() - 1, &temp_sdRbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "cluster_near__eta_phi_det"] = new TH3F(TString(prefix + "cluster_near__eta_phi_det"), ";#eta_{near-cluster};#phi_{near-cluster}", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "cluster_near__eta_E_det"] = new TH3F(TString(prefix + "cluster_near__eta_E_det"), ";#eta_{near-cluster};E_{near-cluster}", etabins.size() - 1, &etabins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+
+        h2[prefix + "cluster_sum__E_det"] = new TH2F(TString(prefix + "cluster_sum__E_det"), ";E_{sum-cluster} (GeV)", pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h2[prefix + "cluster_sum__dR_det"] = new TH2F(TString(prefix + "cluster_sum__dR_det"), ";#DeltaR_{trk,sum-cluster}", temp_dRbins.size() - 1, &temp_dRbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h2[prefix + "cluster_sum__deta_det"] = new TH2F(TString(prefix + "cluster_sum__deta_det"), ";#Delta#eta_{trk,sum-cluster}", temp_sdRbins.size() - 1, &temp_sdRbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h2[prefix + "cluster_sum__dphi_det"] = new TH2F(TString(prefix + "cluster_sum__dphi_det"), ";#Delta#phi_{trk,near-cluster}", temp_sdRbins.size() - 1, &temp_sdRbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "cluster_sum__eta_phi_det"] = new TH3F(TString(prefix + "cluster_sum__eta_phi_det"), ";#eta_{sum-cluster};#phi_{sum-cluster}", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "cluster_sum__eta_E_det"] = new TH3F(TString(prefix + "cluster_sum__eta_E_det"), ";#eta_{sum-cluster};E_{sum-cluster}", etabins.size() - 1, &etabins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+
+
+        h3[prefix + "electron_high__p_E_det"] = new TH3F(TString(prefix + "electron_high__p_E_det"), ";p_{e} (GeV);E_{high-cluster} (GeV)", pbins.size() - 1, &pbins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "electron_high__p_Ep_det"] = new TH3F(TString(prefix + "electron_high__p_Ep_det"), ";p_{e} (GeV);E_{high-cluster}/p_{e}", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "all_high__p_E_det"] = new TH3F(TString(prefix + "all_high__p_E_det"), ";p (GeV);E_{cluster} (GeV)", pbins.size() - 1, &pbins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "all_high__p_Ep_det"] = new TH3F(TString(prefix + "all_high__p_Ep_det"), ";p (GeV);E_{cluster}/p", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], ecalbins.size() - 1, &ecalbins[0]);
+
+        h3[prefix + "electron_near__p_E_det"] = new TH3F(TString(prefix + "electron_near__p_E_det"), ";p_{e} (GeV);E_{near-cluster} (GeV)", pbins.size() - 1, &pbins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "electron_near__p_Ep_det"] = new TH3F(TString(prefix + "electron_near__p_Ep_det"), ";p_{e} (GeV);E_{near-cluster}/p_{e}", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "all_near__p_E_det"] = new TH3F(TString(prefix + "all_near__p_E_det"), ";p (GeV);E_{cluster} (GeV)", pbins.size() - 1, &pbins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "all_near__p_Ep_det"] = new TH3F(TString(prefix + "all_near__p_Ep_det"), ";p (GeV);E_{cluster}/p", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], ecalbins.size() - 1, &ecalbins[0]);
+
+        h3[prefix + "electron_sum__p_E_det"] = new TH3F(TString(prefix + "electron_sum__p_E_det"), ";p_{e} (GeV);E_{sum-cluster} (GeV)", pbins.size() - 1, &pbins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "electron_sum__p_Ep_det"] = new TH3F(TString(prefix + "electron_sum__p_Ep_det"), ";p_{e} (GeV);E_{sum-cluster}/p_{e}", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "all_sum__p_E_det"] = new TH3F(TString(prefix + "all_sum__p_E_det"), ";p (GeV);E_{cluster} (GeV)", pbins.size() - 1, &pbins[0], pbins.size() - 1, &pbins[0], ecalbins.size() - 1, &ecalbins[0]);
+        h3[prefix + "all_sum__p_Ep_det"] = new TH3F(TString(prefix + "all_sum__p_Ep_det"), ";p (GeV);E_{cluster}/p", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], ecalbins.size() - 1, &ecalbins[0]);
+
+    }
+
 }
 
 
