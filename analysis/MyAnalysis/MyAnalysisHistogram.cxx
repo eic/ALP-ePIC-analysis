@@ -22,9 +22,10 @@ vector<float> dRbins_wide = binning(100, 0, 2.0);
 vector<float> sdRbins_wide = binning(100, -2.0, 2.0);
 vector<float> ecalbins = binning(5, 0, 5);
 
-vector<float> sbins = binning(10, 0, 10);
+vector<float> sbins = binning(20, 0, 20);
 vector<float> q2bins = logbinning(200, 0.001, 1000.0);
 vector<float> ratbins = binning(100, 0, 2);
+vector<float> fracbins = binning(100, 0, 1);
 
 
 // *****************************************************************************
@@ -188,6 +189,9 @@ void reserve_qa_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<strin
     h2["QA_sim__pTmiss_pTe"] = new TH2F("QA_sim__pTmiss_pTe", ";Generated p_{T,miss} (GeV);Generated p_{T,e} (GeV)", pTbins.size() - 1, &pTbins[0], pTbins.size() - 1, &pTbins[0]);
     h2["QA_sim__pTmiss_etae"] = new TH2F("QA_sim__pTmiss_etae", ";Generated p_{T,miss} (GeV);Generated #eta_{e}", pTbins.size() - 1, &pTbins[0], etabins.size() - 1, &etabins[0]);
     h2["QA_sim__etae_pTe"] = new TH2F("QA_sim__etae_pTe", ";Generated #eta_{e};Generated p_{T,e} (GeV)", etabins.size() - 1, &etabins[0], pTbins.size() - 1, &pTbins[0]);
+
+    h1["QA_sim_electron__Efrac"] = new TH1F("QA_sim_electron__Efrac", ";E_{ele}/E_{beam}", fracbins.size() - 1, &fracbins[0]);
+    h1["QA_sim_ALP__Efrac"] = new TH1F("QA_sim_ALP__Efrac", ";E_{ALP}/E_{beam}", fracbins.size() - 1, &fracbins[0]);
 
     // QA Plots (Rec)
     h1["QA_rec__Q2"] = new TH1F("QA_rec__Q2", ";Reconstructed Q^{2} (GeV^{2})", q2bins.size() - 1, &q2bins[0]);

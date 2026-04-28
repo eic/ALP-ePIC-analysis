@@ -19,6 +19,13 @@ void MyAnalysis::AnalyzeQA()
     TVector3 pe_rec;
     if (ele_rec != edm4eic::ReconstructedParticle::makeEmpty()) pe_rec = TVector3(ele_rec.getMomentum().x, ele_rec.getMomentum().y, ele_rec.getMomentum().z);
 
+    auto ele_ini = ev->GetInitialLeptonTrue();
+    auto alp = ev->GetALPTrue();
+    float Ebeam = 0, Eele = 0, Ealp = 0;
+    if (ele_ini != edm4hep::MCParticle::makeEmpty()) Ebeam = ele_ini.getEnergy();
+    if (ele_sim != edm4hep::MCParticle::makeEmpty()) Eele = ele_sim.getEnergy();
+    if (alp != edm4hep::MCParticle::makeEmpty()) Ealp = alp.getEnergy();
+
     if (ev->particles_sim.size() > 0)
     {
         h1["QA_sim__Q2"]->Fill(q2_sim);
@@ -32,6 +39,9 @@ void MyAnalysis::AnalyzeQA()
         h2["QA_sim__pTmiss_pTe"]->Fill(pTmiss_sim, pe_sim.Pt());
         h2["QA_sim__pTmiss_etae"]->Fill(pTmiss_sim, pe_sim.Eta());
         h2["QA_sim__etae_pTe"]->Fill(pe_sim.Eta(), pe_sim.Pt());
+
+        h1["QA_sim_electron__Efrac"]->Fill(Eele/Ebeam);
+        h1["QA_sim_ALP__Efrac"]->Fill(Ealp/Ebeam);
     }
 
     if (ev->particles_rec.size() > 0)
@@ -76,16 +86,22 @@ void MyAnalysis::AnalyzeEfficiency()
     bool isgood_cluster = false;
     for (auto par : ev->particles) if (par.sim.getPDG() == 11 && par.sim.getGeneratorStatus() == 1 && par.clusters.size() > 0) {isgood_cluster = true; break;}
 
-    int stage = 0;
-    if (isgood_rec) stage = 1;
-    if (isgood_rec && isgood_PID) stage = 2;
-    if (isgood_rec && isgood_PID && isgood_pTe) stage = 3;
-    if (isgood_rec && isgood_PID && isgood_pTe && isgood_etae) stage = 4;
+    vector<int> stages;
+    stages.push_back(0);
+    if (isgood_rec) stages.push_back(1);
+    if (isgood_rec && isgood_PID) stages.push_back(2);
+    if (isgood_rec && isgood_PID && isgood_cluster) stages.push_back(3);
+    if (isgood_rec && isgood_PID && isgood_cluster && isgood_pTe) stages.push_back(4);
+    if (isgood_rec && isgood_PID && isgood_cluster && isgood_pTe && isgood_etae) stages.push_back(5);
 
-    for (int istage = 0; istage < 20; istage++)
+    stages.push_back(10);
+    if (isgood_rec) stages.push_back(11);
+    if (isgood_rec && isgood_cluster) stages.push_back(12);
+    if (isgood_rec && isgood_cluster && isgood_PID) stages.push_back(13);
+
+
+    for (int istage : stages)
     {
-        if (istage > stage) break;
-
         float q2_sim = ev->Q2_true();
         float pTmiss_sim = ev->pTmiss_true().Pt();
         auto ele_sim = ev->GetFinalLeptonTrue();
@@ -326,6 +342,7 @@ void MyAnalysis::AnalyzeElectronIdentification()
         TVector3 posE(c_ECAL.getPosition().x, c_ECAL.getPosition().y, c_ECAL.getPosition().z);
         TVector3 posH(c_HCAL.getPosition().x, c_HCAL.getPosition().y, c_HCAL.getPosition().z);
 
+        /*
         cout << "Event : " << ev->id << endl;
         cout << setw(ww) << "type" << setw(ww) << "PDG/CAL/id" << setw(ww) << "system" << setw(ww) << "surface" << setw(ww) << "E/p" << setw(ww) << "pT/R" << setw(ww) << "pZ/Z" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
         cout << setw(ww) << "Genparticle" << setw(ww) << sim.getPDG() << setw(ww) << "" << setw(ww) << "" << setw(ww) << sim.getEnergy() << setw(ww) << ps.Pt() << setw(ww) << ps.Pz() << setw(ww) << ps.Eta() << setw(ww) << ps.Phi() << endl;
@@ -339,7 +356,7 @@ void MyAnalysis::AnalyzeElectronIdentification()
             cout << setw(ww) << "TrackPoint" << setw(ww) << i << setw(ww) << p.system << setw(ww) << p.surface << setw(ww) << "" << setw(ww) << pos.Perp() << setw(ww) << pos.Z() << setw(ww) << pos.Eta() << setw(ww) << pos.Phi() << endl;
         }
         cout << endl;
-
+        */
 
         // Look at defintions.xml
     }

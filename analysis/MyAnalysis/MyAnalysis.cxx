@@ -99,6 +99,7 @@ bool MyAnalysis::Next()
     TrackHCalClusterMatching();
 
     // Your Analysis begins here
+    TestingSpace();
     AnalyzeQA();
     AnalyzeEfficiency();
     AnalyzeResolution();
@@ -109,4 +110,40 @@ bool MyAnalysis::Next()
     // Your Analysis ends here
 
     return true;
+}
+
+// *****************************************************************************
+void MyAnalysis::TestingSpace()
+{
+    // Low Q2 tagger?
+    int kk = 0;
+    for (unsigned int i = 0; i < ev->particles.size(); ++i)
+    {
+        auto& par = ev->particles[i];
+        auto& sim = par.sim;
+        auto& rec = par.rec;
+        TVector3 ps(sim.getMomentum().x,sim.getMomentum().y,sim.getMomentum().z);
+        TVector3 pr(rec.getMomentum().x,rec.getMomentum().y,rec.getMomentum().z);
+
+        //if (ps.Eta() > -6 || pr.Eta() > -6) continue;
+        if (par.tracks_tagger.size() == 0) continue;
+        kk++;
+
+        int ww = 15;
+        if (kk == 1) cout << setw(ww) << "i" << setw(ww) << "type" << setw(ww) << "PDG" << setw(ww) << "Collection" << setw(ww) << "P" << setw(ww) << "Pz" << setw(ww) << "Pt" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
+        cout << setw(ww) << i << setw(ww) << "MCParticle" << setw(ww) << sim.getPDG() << setw(ww) << sim.getObjectID().collectionID << setw(ww) << ps.Mag() << setw(ww) << ps.Pz() << setw(ww) << ps.Pt() << setw(ww) << ps.Eta() << setw(ww) << ps.Phi() << endl;
+        cout << setw(ww) << i << setw(ww) << "RecChaPar" << setw(ww) << "" << setw(ww) << rec.getObjectID().collectionID << setw(ww) << pr.Mag() << setw(ww) << pr.Pz() << setw(ww) << pr.Pt() << setw(ww) << pr.Eta() << setw(ww) << pr.Phi() << endl;
+        for (unsigned int j = 0; j < par.tracks.size(); ++j)
+        {
+            auto& trk = par.tracks[j];
+            TVector3 p(trk.getMomentum().x,trk.getMomentum().y,trk.getMomentum().z);
+            cout << setw(ww) << i << setw(ww) << "Track" << setw(ww) << "" << setw(ww) << trk.getObjectID().collectionID << setw(ww) << p.Mag() << setw(ww) << p.Pz() << setw(ww) << p.Pt() << setw(ww) << p.Eta() << setw(ww) << p.Phi() << endl;
+        }
+        for (unsigned int j = 0; j < par.tracks_tagger.size(); ++j)
+        {
+            auto& trk = par.tracks_tagger[j];
+            TVector3 p(trk.getMomentum().x,trk.getMomentum().y,trk.getMomentum().z);
+            cout << setw(ww) << i << setw(ww) << "TagTrk" << setw(ww) << "" << setw(ww) << trk.getObjectID().collectionID << setw(ww) << p.Mag() << setw(ww) << p.Pz() << setw(ww) << p.Pt() << setw(ww) << p.Eta() << setw(ww) << p.Phi() << endl;
+        }
+    }
 }

@@ -76,6 +76,8 @@ private:
     bool Next();
     bool End();
 
+    void TestingSpace();
+
     // MyAnalysisHistogram.cxx
     void ReserveHistograms();
 

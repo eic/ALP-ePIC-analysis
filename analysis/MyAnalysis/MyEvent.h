@@ -27,6 +27,7 @@ public:
     vector<edm4eic::TrackPoint> projection; // Projection for CentralCKFTracks
     vector<edm4eic::Track> tracks;
     vector<vector<edm4eic::TrackPoint>> points; // for projection
+    vector<edm4eic::Track> tracks_tagger;
 
     // EMC
     vector<edm4eic::Cluster> clusters;
@@ -63,7 +64,7 @@ public:
         projection.clear();
         tracks.clear();
         points.clear();
-
+        tracks_tagger.clear();
 
         clusters.clear();
         cluster_high = edm4eic::Cluster();
@@ -93,6 +94,7 @@ public:
     uint32_t collectionID_BHCal; // Should move to MyAnalysis eventually
     uint32_t collectionID_NHCal; // Should move to MyAnalysis eventually
     uint32_t collectionID_PHCal; // Should move to MyAnalysis eventually
+
     int nmatches; // cluster-track matching (EMC)
     int nmatches_hcal; // cluster-track matching (HCal)
 
@@ -141,6 +143,12 @@ public:
     edm4hep::MCParticle GetInitialLeptonTrue()
     {
         for (auto par : particles_sim) if (par.getPDG() == 11 && par.getGeneratorStatus() == 4) return par;
+        return edm4hep::MCParticle::makeEmpty();
+    }
+
+    edm4hep::MCParticle GetALPTrue()
+    {
+        for (auto par : particles_sim) if (par.getPDG() == 0 && par.getGeneratorStatus() == 1) return par;
         return edm4hep::MCParticle::makeEmpty();
     }
 

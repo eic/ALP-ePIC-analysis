@@ -11,17 +11,21 @@
 #include "MyAnalysis.h"
 
 // *****************************************************************************
+map<unsigned int, vector<edm4eic::Track>> track_mapping(const edm4eic::MCRecoTrackParticleAssociationCollection& associations);
 map<unsigned int, vector<edm4eic::TrackPoint>> trackpoint_mapping(const edm4eic::TrackSegmentCollection& projections);
 map<unsigned int, vector<edm4eic::Cluster>> cluster_mapping(const edm4eic::MCRecoClusterParticleAssociationCollection& associations);
 
 // *****************************************************************************
 bool MyAnalysis::ReadPODIO()
 {
-    auto& particles_rec = frame.get<edm4eic::ReconstructedParticleCollection>("ReconstructedChargedParticles");
     auto& particles_sim = frame.get<edm4hep::MCParticleCollection>("MCParticles");
-    auto& associations = frame.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedChargedParticleAssociations");
+    auto& particles_rec = frame.get<edm4eic::ReconstructedParticleCollection>("ReconstructedChargedParticles");
 
     auto collectionID_CKF = frame.get<edm4eic::TrackCollection>("CentralCKFTracks").getID();
+    auto collectionID_TM1 = frame.get<edm4eic::TrackCollection>("TaggerTrackerM1LocalTrackAssociations").getID();
+    auto collectionID_TM2 = frame.get<edm4eic::TrackCollection>("TaggerTrackerM2LocalTrackAssociations").getID();
+
+    auto& associations = frame.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedChargedParticleAssociations");
 
     auto& clusters_BEMC = frame.get<edm4eic::ClusterCollection>("EcalBarrelClusters");
     auto& clusters_NEMC = frame.get<edm4eic::ClusterCollection>("EcalEndcapNClusters");
@@ -47,6 +51,8 @@ bool MyAnalysis::ReadPODIO()
     collectionID_NHCal = clusters_NHCal.getID();
     collectionID_PHCal = clusters_PHCal.getID();
 
+    auto mapTaggerTrackM1 = track_mapping(frame.get<edm4eic::MCRecoTrackParticleAssociationCollection>("TaggerTrackerM1LocalTrackAssociations"));
+    auto mapTaggerTrackM2 = track_mapping(frame.get<edm4eic::MCRecoTrackParticleAssociationCollection>("TaggerTrackerM2LocalTrackAssociations"));
 
     auto mapTrackPoint = trackpoint_mapping(frame.get<edm4eic::TrackSegmentCollection>("CalorimeterTrackProjections"));
     auto mapBEMC = cluster_mapping(frame.get<edm4eic::MCRecoClusterParticleAssociationCollection>("EcalBarrelClusterAssociations"));
@@ -101,6 +107,11 @@ bool MyAnalysis::ReadPODIO()
             }
         }
 
+        // Fill low-Q2 tagger track info
+        par.tracks_tagger.clear();
+        if (mapTaggerTrackM1.count(idsim)) par.tracks_tagger.insert(par.tracks_tagger.end(), mapTaggerTrackM1.at(idsim).begin(), mapTaggerTrackM1.at(idsim).end());
+        if (mapTaggerTrackM2.count(idsim)) par.tracks_tagger.insert(par.tracks_tagger.end(), mapTaggerTrackM2.at(idsim).begin(), mapTaggerTrackM2.at(idsim).end());
+
         // Fill Cluster info
         par.clusters.clear();
         if (mapBEMC.count(idsim)) par.clusters.insert(par.clusters.end(), mapBEMC.at(idsim).begin(), mapBEMC.at(idsim).end());
@@ -116,10 +127,18 @@ bool MyAnalysis::ReadPODIO()
         ev->particles.push_back(par);
     }
 
+
     return true;
 }
 
 // *****************************************************************************
+map<unsigned int, vector<edm4eic::Track>> track_mapping(const edm4eic::MCRecoTrackParticleAssociationCollection& associations)
+{
+    map<unsigned int, vector<edm4eic::Track>> trackmap;
+    for (const auto& asso : associations) trackmap[asso.getSim().getObjectID().index].push_back(asso.getRec());
+    return trackmap;
+}
+
 map<unsigned int, vector<edm4eic::TrackPoint>> trackpoint_mapping(const edm4eic::TrackSegmentCollection& projections)
 {
     std::map<unsigned int, vector<edm4eic::TrackPoint>> tpmap;
