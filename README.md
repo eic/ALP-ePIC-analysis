@@ -1,4 +1,4 @@
-# ALP-ePIC
+# ALP-ePIC-analysis
 Simulation and analysis of electrophilic Axion-Like Particle (ALP) production processes at the Electron-Ion Collider (ePIC).
 
 ## Requirements
