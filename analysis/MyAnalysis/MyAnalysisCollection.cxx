@@ -7,14 +7,14 @@ void MyAnalysis::AnalyzeQA()
     if (ev->particles_sim.size() > 0) h1["event__stage"]->Fill(0);
     if (ev->particles.size() > 0) h1["event__stage"]->Fill(1);
 
-    float q2_sim = ev->Q2_true();
-    float pTmiss_sim = ev->pTmiss_true().Pt();
+    float q2_sim = ev->q2true;
+    float pTmiss_sim = ev->pmisstrue.Pt();
     auto ele_sim = ev->GetFinalLeptonTrue();
     TVector3 pe_sim;
     if (ele_sim != edm4hep::MCParticle::makeEmpty()) pe_sim = TVector3(ele_sim.getMomentum().x, ele_sim.getMomentum().y, ele_sim.getMomentum().z);
 
-    float q2_rec = ev->Q2();
-    float pTmiss_rec = ev->pTmiss().Pt();
+    float q2_rec = ev->q2;
+    float pTmiss_rec = ev->pmiss.Pt();
     auto ele_rec = ev->GetFinalLepton();
     TVector3 pe_rec;
     if (ele_rec != edm4eic::ReconstructedParticle::makeEmpty()) pe_rec = TVector3(ele_rec.getMomentum().x, ele_rec.getMomentum().y, ele_rec.getMomentum().z);
@@ -29,6 +29,7 @@ void MyAnalysis::AnalyzeQA()
     if (ev->particles_sim.size() > 0)
     {
         h1["QA_sim__Q2"]->Fill(q2_sim);
+        h1["QA_sim__pe"]->Fill(pe_sim.Mag());
         h1["QA_sim__pTmiss"]->Fill(pTmiss_sim);
         h1["QA_sim__pTe"]->Fill(pe_sim.Pt());
         h1["QA_sim__etae"]->Fill(pe_sim.Eta());
@@ -39,14 +40,19 @@ void MyAnalysis::AnalyzeQA()
         h2["QA_sim__pTmiss_pTe"]->Fill(pTmiss_sim, pe_sim.Pt());
         h2["QA_sim__pTmiss_etae"]->Fill(pTmiss_sim, pe_sim.Eta());
         h2["QA_sim__etae_pTe"]->Fill(pe_sim.Eta(), pe_sim.Pt());
+        h2["QA_sim__etae_pe"]->Fill(pe_sim.Eta(), pe_sim.Mag());
+
 
         h1["QA_sim_electron__Efrac"]->Fill(Eele/Ebeam);
         h1["QA_sim_ALP__Efrac"]->Fill(Ealp/Ebeam);
     }
 
-    if (ev->particles_rec.size() > 0)
+    for (auto& par : ev->particles)
     {
+        if (par.sim.getPDG() != cuts.PDG_Lepton || par.sim.getGeneratorStatus() != 1) continue;
+
         h1["QA_rec__Q2"]->Fill(q2_rec);
+        h1["QA_rec__pe"]->Fill(pe_rec.Mag());
         h1["QA_rec__pTmiss"]->Fill(pTmiss_rec);
         h1["QA_rec__pTe"]->Fill(pe_rec.Pt());
         h1["QA_rec__etae"]->Fill(pe_rec.Eta());
@@ -57,14 +63,91 @@ void MyAnalysis::AnalyzeQA()
         h2["QA_rec__pTmiss_pTe"]->Fill(pTmiss_rec, pe_rec.Pt());
         h2["QA_rec__pTmiss_etae"]->Fill(pTmiss_rec, pe_rec.Eta());
         h2["QA_rec__etae_pTe"]->Fill(pe_rec.Eta(), pe_rec.Pt());
+        h2["QA_rec__etae_pe"]->Fill(pe_rec.Eta(), pe_rec.Mag());
+
+        break;
     }
 
+    for (auto& par : ev->particles)
+    {
+        int type = 0;
+        if (par.sim.getPDG() == cuts.PDG_Lepton && par.sim.getGeneratorStatus() == 1) type = 1;
+
+        h2["QA_rec_track__nhits_type"]->Fill(par.nhits, type);
+    }
+
+    for (auto& par : ev->particles)
+    {
+        auto& sim = par.sim;
+        auto& rec = par.rec;
+        TVector3 p(rec.getMomentum().x,rec.getMomentum().y,rec.getMomentum().z);
+        TVector3 ps(sim.getMomentum().x,sim.getMomentum().y,sim.getMomentum().z);
+        auto& c = par.cluster_high;
+
+        //
+        h2["QA_sim__pT_bitmask2"]->Fill(ps.Pt(), par.bitmask2);
+        h2["QA_sim__p_bitmask2"]->Fill(ps.Mag(), par.bitmask2);
+        h2["QA_sim__eta_bitmask2"]->Fill(ps.Eta(), par.bitmask2);
+
+        //
+        h2["QA_rec__nhits_bitmask"]->Fill(par.nhits, par.bitmask);
+        h2["QA_rec__pT_bitmask"]->Fill(p.Pt(), par.bitmask);
+        h2["QA_rec__p_bitmask"]->Fill(p.Mag(), par.bitmask);
+        h2["QA_rec__eta_bitmask"]->Fill(p.Eta(), par.bitmask);
+
+        h2["QA_rec__nhits_bitmask2"]->Fill(par.nhits, par.bitmask2);
+        h2["QA_rec__pT_bitmask2"]->Fill(p.Pt(), par.bitmask2);
+        h2["QA_rec__p_bitmask2"]->Fill(p.Mag(), par.bitmask2);
+        h2["QA_rec__eta_bitmask2"]->Fill(p.Eta(), par.bitmask2);
+
+        if (par.clusters.size() > 0)
+        {
+            h2["QA_rec__E_bitmask"]->Fill(c.getEnergy(), par.bitmask);
+            h2["QA_rec__Ep_bitmask"]->Fill(c.getEnergy()/p.Mag(), par.bitmask);
+            h3["QA_rec__p_Ep_bitmask"]->Fill(p.Mag(), c.getEnergy()/p.Mag(), par.bitmask);
+
+            h2["QA_rec__E_bitmask2"]->Fill(c.getEnergy(), par.bitmask2);
+            h2["QA_rec__Ep_bitmask2"]->Fill(c.getEnergy()/p.Mag(), par.bitmask2);
+            h3["QA_rec__p_Ep_bitmask2"]->Fill(p.Mag(), c.getEnergy()/p.Mag(), par.bitmask2);
+        }
+
+    }
+
+    for (auto& sim : ev->particles_sim)
+    {
+        TVector3 p(sim.getMomentum().x, sim.getMomentum().y, sim.getMomentum().z);
+
+        if (abs(sim.getPDG()) == 0 && sim.getGeneratorStatus() == 2)
+        {
+            h2["QA_sim_ALP__eta_pT"]->Fill(p.Eta(), p.Pt());
+            h2["QA_sim_ALP__etae_eta"]->Fill(pe_sim.Eta(), p.Eta());
+            h2["QA_sim_ALP__etae_pT"]->Fill(pe_sim.Eta(), p.Pt());
+            h2["QA_sim_ALP__pTe_eta"]->Fill(pe_sim.Pt(), p.Eta());
+            h2["QA_sim_ALP__pTe_pT"]->Fill(pe_sim.Pt(), p.Pt());
+
+        }
+
+        if (abs(sim.getPDG()) == 13 && sim.getGeneratorStatus() == 1)
+        {
+            float q = sim.getCharge();
+
+            h3["QA_sim_decay__eta_pT_charge"]->Fill(p.Eta(), p.Pt(), q);
+            h3["QA_sim_decay__etae_eta_charge"]->Fill(pe_sim.Eta(), p.Eta(), q);
+            h3["QA_sim_decay__etae_pT_charge"]->Fill(pe_sim.Eta(), p.Pt(), q);
+            h3["QA_sim_decay__pTe_eta_charge"]->Fill(pe_sim.Pt(), p.Eta(), q);
+            h3["QA_sim_decay__pTe_pT_charge"]->Fill(pe_sim.Pt(), p.Pt(), q);
+        }
+    }
 
 }
 
 // *****************************************************************************
 void MyAnalysis::AnalyzeEfficiency()
 {
+    auto ele_sim = ev->GetFinalLeptonTrue();
+    TVector3 pe_sim(0,0,0);
+    if (ele_sim != edm4hep::MCParticle::makeEmpty()) pe_sim = TVector3(ele_sim.getMomentum().x, ele_sim.getMomentum().y, ele_sim.getMomentum().z);
+
     auto ele = ev->GetFinalLepton();
     TVector3 pele(0,0,0);
     int pdgele = 0;
@@ -74,14 +157,16 @@ void MyAnalysis::AnalyzeEfficiency()
         pdgele = ev->GetFinalLepton().getPDG();
     }
 
+
     // Is there any reconstructed track? true electron matched track?
     bool isgood_rec = (ev->particles_rec.size() > 0 && ele != edm4eic::ReconstructedParticle::makeEmpty());
     // Does the lepton have the correct PID?
     bool isgood_PID = pdgele == 11;
-    // Does it have a good pT
-    bool isgood_pTe = pele.Pt() > cuts.Min_Lepton_Pt;
+    // Does it have a good pT or p?
+    bool isgood_pTe = pe_sim.Pt() > cuts.Min_Lepton_Pt;
+    bool isgood_pe = pe_sim.Mag() > cuts.Min_Lepton_P;
     // Good eta?
-    bool isgood_etae = pele.Eta() > cuts.Min_Lepton_Eta && pele.Eta() < cuts.Max_Lepton_Eta;
+    bool isgood_etae = pe_sim.Eta() > cuts.Min_Lepton_Eta && pe_sim.Eta() < cuts.Max_Lepton_Eta;
     // Does the lepton track have matching ECAL clusters?
     bool isgood_cluster = false;
     for (auto par : ev->particles) if (par.sim.getPDG() == 11 && par.sim.getGeneratorStatus() == 1 && par.clusters.size() > 0) {isgood_cluster = true; break;}
@@ -91,22 +176,24 @@ void MyAnalysis::AnalyzeEfficiency()
     if (isgood_rec) stages.push_back(1);
     if (isgood_rec && isgood_PID) stages.push_back(2);
     if (isgood_rec && isgood_PID && isgood_cluster) stages.push_back(3);
-    if (isgood_rec && isgood_PID && isgood_cluster && isgood_pTe) stages.push_back(4);
-    if (isgood_rec && isgood_PID && isgood_cluster && isgood_pTe && isgood_etae) stages.push_back(5);
+    if (isgood_rec && isgood_PID && isgood_cluster && isgood_pe) stages.push_back(4);
+    if (isgood_rec && isgood_PID && isgood_cluster && isgood_pe && isgood_etae) stages.push_back(5);
 
-    stages.push_back(10);
-    if (isgood_rec) stages.push_back(11);
-    if (isgood_rec && isgood_cluster) stages.push_back(12);
-    if (isgood_rec && isgood_cluster && isgood_PID) stages.push_back(13);
+    if (isgood_pe && isgood_etae) stages.push_back(10);
+    if (isgood_pe && isgood_etae && isgood_rec) stages.push_back(11);
+    if (isgood_pe && isgood_etae && isgood_rec && isgood_cluster) stages.push_back(12);
+
+    if (isgood_pTe && isgood_etae) stages.push_back(15);
+    if (isgood_pTe && isgood_etae && isgood_rec) stages.push_back(16);
+    if (isgood_pTe && isgood_etae && isgood_rec && isgood_cluster) stages.push_back(17);
+
+    //if (isgood_pe && isgood_etae && isgood_rec && isgood_PID) stages.push_back(15);
 
 
     for (int istage : stages)
     {
-        float q2_sim = ev->Q2_true();
-        float pTmiss_sim = ev->pTmiss_true().Pt();
-        auto ele_sim = ev->GetFinalLeptonTrue();
-        TVector3 pe_sim;
-        if (ele_sim != edm4hep::MCParticle::makeEmpty()) pe_sim = TVector3(ele_sim.getMomentum().x, ele_sim.getMomentum().y, ele_sim.getMomentum().z);
+        float q2_sim = ev->q2true;
+        float pTmiss_sim = ev->pmisstrue.Pt();
 
         h2["Eff__Q2_stage"]->Fill(q2_sim, istage);
         h2["Eff__pTmiss_stage"]->Fill(pTmiss_sim, istage);
@@ -118,6 +205,9 @@ void MyAnalysis::AnalyzeEfficiency()
         h3["Eff__pTmiss_pTe_stage"]->Fill(pTmiss_sim, pe_sim.Pt(), istage);
         h3["Eff__pTmiss_etae_stage"]->Fill(pTmiss_sim, pe_sim.Eta(), istage);
         h3["Eff__etae_pTe_stage"]->Fill(pe_sim.Eta(), pe_sim.Pt(), istage);
+
+        h2["Eff__pe_stage"]->Fill(pe_sim.Mag(), istage);
+        h3["Eff__etae_pe_stage"]->Fill(pe_sim.Eta(), pe_sim.Mag(), istage);
     }
 }
 
@@ -126,14 +216,14 @@ void MyAnalysis::AnalyzeResolution()
 {
     if (ev->particles_sim.size() == 0 || ev->particles_rec.size() == 0) return;
 
-    float q2_sim = ev->Q2_true();
-    float pTmiss_sim = ev->pTmiss_true().Pt();
+    float q2_sim = ev->q2true;
+    float pTmiss_sim = ev->pmisstrue.Pt();
     auto ele_sim = ev->GetFinalLeptonTrue();
     TVector3 pe_sim;
     if (ele_sim != edm4hep::MCParticle::makeEmpty()) pe_sim = TVector3(ele_sim.getMomentum().x, ele_sim.getMomentum().y, ele_sim.getMomentum().z);
 
-    float q2_rec = ev->Q2();
-    float pTmiss_rec = ev->pTmiss().Pt();
+    float q2_rec = ev->q2;
+    float pTmiss_rec = ev->pmiss.Pt();
     auto ele_rec = ev->GetFinalLepton();
     TVector3 pe_rec;
     if (ele_rec != edm4eic::ReconstructedParticle::makeEmpty()) pe_rec = TVector3(ele_rec.getMomentum().x, ele_rec.getMomentum().y, ele_rec.getMomentum().z);

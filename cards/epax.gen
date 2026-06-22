@@ -1,5 +1,0 @@
-import model ALP_axff_UFO
-generate p e- > p ax e-
-display diagrams
-output epax
-exit

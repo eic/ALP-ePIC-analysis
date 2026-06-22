@@ -26,6 +26,9 @@ vector<float> sbins = binning(20, 0, 20);
 vector<float> q2bins = logbinning(200, 0.001, 1000.0);
 vector<float> ratbins = binning(100, 0, 2);
 vector<float> fracbins = binning(100, 0, 1);
+vector<float> maskbins = binning(129, 0, 129);
+
+vector<float> chargebins = binning(2, -2, 2);
 
 
 // *****************************************************************************
@@ -165,6 +168,7 @@ void reserve_eff_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<stri
     h2["Eff__pTmiss_stage"] = new TH2F("Eff__pTmiss_stage", ";Generated p_{T,miss} (GeV)", pTbins.size() - 1, &pTbins[0], sbins.size() - 1, &sbins[0]);
     h2["Eff__pTe_stage"] = new TH2F("Eff__pTe_stage", ";Generated p_{T,e} (GeV)", pTbins.size() - 1, &pTbins[0], sbins.size() - 1, &sbins[0]);
     h2["Eff__etae_stage"] = new TH2F("Eff__etae_stage", ";Generated #eta_{e}", etabins.size() - 1, &etabins[0], sbins.size() - 1, &sbins[0]);
+    h2["Eff__pe_stage"] = new TH2F("Eff__pe_stage", ";Generated p_{e} (GeV)", pbins.size() - 1, &pbins[0], sbins.size() - 1, &sbins[0]);
 
     h3["Eff__Q2_pTmiss_stage"] = new TH3F("Eff__Q2_pTmiss_stage", ";Generated Q^{2} (GeV^{2});Generated p_{T,miss} (GeV)", q2bins.size() - 1, &q2bins[0], pTbins.size() - 1, &pTbins[0], sbins.size() - 1, &sbins[0]);
     h3["Eff__Q2_pTe_stage"] = new TH3F("Eff__Q2_pTe_stage", ";Generated Q^{2} (GeV^{2});Generated p_{T,e} (GeV)", q2bins.size() - 1, &q2bins[0], pTbins.size() - 1, &pTbins[0], sbins.size() - 1, &sbins[0]);
@@ -172,6 +176,7 @@ void reserve_eff_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<stri
     h3["Eff__pTmiss_pTe_stage"] = new TH3F("Eff__pTmiss_pTe_stage", ";Generated p_{T,miss} (GeV);Generated p_{T,e} (GeV)", pTbins.size() - 1, &pTbins[0], pTbins.size() - 1, &pTbins[0], sbins.size() - 1, &sbins[0]);
     h3["Eff__pTmiss_etae_stage"] = new TH3F("Eff__pTmiss_etae_stage", ";Generated p_{T,miss} (GeV);Generated #eta_{e}", pTbins.size() - 1, &pTbins[0], etabins.size() - 1, &etabins[0], sbins.size() - 1, &sbins[0]);
     h3["Eff__etae_pTe_stage"] = new TH3F("Eff__etae_pTe_stage", ";Generated #eta_{e};Generated p_{T,e} (GeV)", etabins.size() - 1, &etabins[0], pTbins.size() - 1, &pTbins[0], sbins.size() - 1, &sbins[0]);
+    h3["Eff__etae_pe_stage"] = new TH3F("Eff__etae_pe_stage", ";Generated #eta_{e};Generated p_{e} (GeV)", etabins.size() - 1, &etabins[0], pbins.size() - 1, &pbins[0], sbins.size() - 1, &sbins[0]);
 }
 
 // *****************************************************************************
@@ -190,6 +195,9 @@ void reserve_qa_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<strin
     h2["QA_sim__pTmiss_etae"] = new TH2F("QA_sim__pTmiss_etae", ";Generated p_{T,miss} (GeV);Generated #eta_{e}", pTbins.size() - 1, &pTbins[0], etabins.size() - 1, &etabins[0]);
     h2["QA_sim__etae_pTe"] = new TH2F("QA_sim__etae_pTe", ";Generated #eta_{e};Generated p_{T,e} (GeV)", etabins.size() - 1, &etabins[0], pTbins.size() - 1, &pTbins[0]);
 
+    h1["QA_sim__pe"] = new TH1F("QA_sim__pe", ";Generated p_{e} (GeV)", pbins.size() - 1, &pbins[0]);
+    h2["QA_sim__etae_pe"] = new TH2F("QA_sim__etae_pe", ";Generated #eta_{e};Generated p_{e} (GeV)", etabins.size() - 1, &etabins[0], pbins.size() - 1, &pbins[0]);
+
     h1["QA_sim_electron__Efrac"] = new TH1F("QA_sim_electron__Efrac", ";E_{ele}/E_{beam}", fracbins.size() - 1, &fracbins[0]);
     h1["QA_sim_ALP__Efrac"] = new TH1F("QA_sim_ALP__Efrac", ";E_{ALP}/E_{beam}", fracbins.size() - 1, &fracbins[0]);
 
@@ -205,6 +213,46 @@ void reserve_qa_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<strin
     h2["QA_rec__pTmiss_pTe"] = new TH2F("QA_rec__pTmiss_pTe", ";Reconstructed p_{T,miss} (GeV);Reconstructed p_{T,e} (GeV)", pTbins.size() - 1, &pTbins[0], pTbins.size() - 1, &pTbins[0]);
     h2["QA_rec__pTmiss_etae"] = new TH2F("QA_rec__pTmiss_etae", ";Reconstructed p_{T,miss} (GeV);Reconstructed #eta_{e}", pTbins.size() - 1, &pTbins[0], etabins.size() - 1, &etabins[0]);
     h2["QA_rec__etae_pTe"] = new TH2F("QA_rec__etae_pTe", ";Reconstructed #eta_{e};Reconstructed p_{T,e} (GeV)", etabins.size() - 1, &etabins[0], pTbins.size() - 1, &pTbins[0]);
+
+    h1["QA_rec__pe"] = new TH1F("QA_rec__pe", ";Generated p_{e} (GeV)", pbins.size() - 1, &pbins[0]);
+    h2["QA_rec__etae_pe"] = new TH2F("QA_rec__etae_pe", ";Generated #eta_{e};Generated p_{e} (GeV)", etabins.size() - 1, &etabins[0], pbins.size() - 1, &pbins[0]);
+
+
+    h2["QA_rec_track__nhits_type"] = new TH2F("QA_rec_track__nhits_type", ";N_{hits,trk}", 10, 0, 10, 10, 0, 10);
+
+    h2["QA_rec__nhits_bitmask"] = new TH2F("QA_rec__nhits_bitmask", ";N_{hit,trk}", sbins.size() - 1, &sbins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_rec__pT_bitmask"] = new TH2F("QA_rec__pT_bitmask", ";p_{T,trk} (GeV)", pTbins.size() - 1, &pTbins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_rec__p_bitmask"] = new TH2F("QA_rec__p_bitmask", ";p_{trk} (GeV)", pbins.size() - 1, &pbins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_rec__eta_bitmask"] = new TH2F("QA_rec__eta_bitmask", ";#eta_{trk}", etabins.size() - 1, &etabins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_rec__E_bitmask"] = new TH2F("QA_rec__E_bitmask", ";E_{cls} (GeV)", pbins.size() - 1, &pbins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_rec__Ep_bitmask"] = new TH2F("QA_rec__Ep_bitmask", ";E_{cls}/p_{trk}", ratbins.size() - 1, &ratbins[0], maskbins.size() - 1, &maskbins[0]);
+    h3["QA_rec__p_Ep_bitmask"] = new TH3F("QA_rec__p_Ep_bitmask", ";p_{trk} (GeV);E_{cls}/p_{trk}", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], maskbins.size() - 1, &maskbins[0]);
+
+    h2["QA_rec__nhits_bitmask2"] = new TH2F("QA_rec__nhits_bitmask2", ";N_{hit,trk}", sbins.size() - 1, &sbins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_rec__pT_bitmask2"] = new TH2F("QA_rec__pT_bitmask2", ";p_{T,trk} (GeV)", pTbins.size() - 1, &pTbins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_rec__p_bitmask2"] = new TH2F("QA_rec__p_bitmask2", ";p_{trk} (GeV)", pbins.size() - 1, &pbins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_rec__eta_bitmask2"] = new TH2F("QA_rec__eta_bitmask2", ";#eta_{trk}", etabins.size() - 1, &etabins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_rec__E_bitmask2"] = new TH2F("QA_rec__E_bitmask2", ";E_{cls} (GeV)", pbins.size() - 1, &pbins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_rec__Ep_bitmask2"] = new TH2F("QA_rec__Ep_bitmask2", ";E_{cls}/p_{trk}", ratbins.size() - 1, &ratbins[0], maskbins.size() - 1, &maskbins[0]);
+    h3["QA_rec__p_Ep_bitmask2"] = new TH3F("QA_rec__p_Ep_bitmask2", ";p_{trk} (GeV);E_{cls}/p_{trk}", pbins.size() - 1, &pbins[0], ratbins.size() - 1, &ratbins[0], maskbins.size() - 1, &maskbins[0]);
+
+    h2["QA_sim__Q2_bitmask2"] = new TH2F("QA_sim__Q2_bitmask2", ";Q^{2} (GeV^{2})", q2bins.size() - 1, &q2bins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_sim__p_bitmask2"] = new TH2F("QA_sim__p_bitmask2", ";p_{trk} (GeV)", pbins.size() - 1, &pbins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_sim__pT_bitmask2"] = new TH2F("QA_sim__pT_bitmask2", ";p_{T,trk} (GeV)", pTbins.size() - 1, &pTbins[0], maskbins.size() - 1, &maskbins[0]);
+    h2["QA_sim__eta_bitmask2"] = new TH2F("QA_sim__eta_bitmask2", ";#eta_{trk}", etabins.size() - 1, &etabins[0], maskbins.size() - 1, &maskbins[0]);
+
+
+    h2["QA_sim_ALP__eta_pT"] = new TH2F("QA_sim_ALP__eta_pT", ";Generated #eta;Generated p_{T} (GeV)", etabins.size() - 1, &etabins[0], pTbins.size() - 1, &pTbins[0]);
+    h2["QA_sim_ALP__etae_eta"] = new TH2F("QA_sim_ALP__etae_eta", ";Generated #eta_{e};#eta", etabins.size() - 1, &etabins[0], etabins.size() - 1, &etabins[0]);
+    h2["QA_sim_ALP__etae_pT"] = new TH2F("QA_sim_ALP__etae_pT", ";Generated #eta_{e};#eta", etabins.size() - 1, &etabins[0], pTbins.size() - 1, &pTbins[0]);
+    h2["QA_sim_ALP__pTe_eta"] = new TH2F("QA_sim_ALP__pTe_eta", ";Generated p_{T,e} (GeV);#eta", pTbins.size() - 1, &pTbins[0], etabins.size() - 1, &etabins[0]);
+    h2["QA_sim_ALP__pTe_pT"] = new TH2F("QA_sim_ALP__pTe_pT", ";Generated p_{T,e} (GeV);#eta", pTbins.size() - 1, &pTbins[0], pTbins.size() - 1, &pTbins[0]);
+
+    h3["QA_sim_decay__eta_pT_charge"] = new TH3F("QA_sim_decay__eta_pT_charge", ";Generated #eta;Generated p_{T} (GeV)", etabins.size() - 1, &etabins[0], pTbins.size() - 1, &pTbins[0], chargebins.size() - 1, &chargebins[0]);
+    h3["QA_sim_decay__etae_eta_charge"] = new TH3F("QA_sim_decay__etae_eta_charge", ";Generated #eta_{e};#eta", etabins.size() - 1, &etabins[0], etabins.size() - 1, &etabins[0], chargebins.size() - 1, &chargebins[0]);
+    h3["QA_sim_decay__etae_pT_charge"] = new TH3F("QA_sim_decay__etae_pT_charge", ";Generated #eta_{e};#eta", etabins.size() - 1, &etabins[0], pTbins.size() - 1, &pTbins[0], chargebins.size() - 1, &chargebins[0]);
+    h3["QA_sim_decay__pTe_eta_charge"] = new TH3F("QA_sim_decay__pTe_eta_charge", ";Generated p_{T,e} (GeV);#eta", pTbins.size() - 1, &pTbins[0], etabins.size() - 1, &etabins[0], chargebins.size() - 1, &chargebins[0]);
+    h3["QA_sim_decay__pTe_pT_charge"] = new TH3F("QA_sim_decay__pTe_pT_charge", ";Generated p_{T,e} (GeV);#eta", pTbins.size() - 1, &pTbins[0], pTbins.size() - 1, &pTbins[0], chargebins.size() - 1, &chargebins[0]);
 }
 
 

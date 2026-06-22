@@ -11,9 +11,14 @@
 #include "MyAnalysis.h"
 
 // *****************************************************************************
+map<unsigned int, vector<edm4hep::MCParticle>> gen_mapping(const edm4eic::MCRecoParticleAssociationCollection& associations);
+map<unsigned int, vector<edm4eic::ReconstructedParticle>> rec_mapping(const edm4eic::MCRecoParticleAssociationCollection& associations);
+
 map<unsigned int, vector<edm4eic::Track>> track_mapping(const edm4eic::MCRecoTrackParticleAssociationCollection& associations);
 map<unsigned int, vector<edm4eic::TrackPoint>> trackpoint_mapping(const edm4eic::TrackSegmentCollection& projections);
 map<unsigned int, vector<edm4eic::Cluster>> cluster_mapping(const edm4eic::MCRecoClusterParticleAssociationCollection& associations);
+
+MyCluster convert_cluster(edm4eic::Cluster c, bool is_ECal, int type);
 
 // *****************************************************************************
 bool MyAnalysis::ReadPODIO()
@@ -21,11 +26,14 @@ bool MyAnalysis::ReadPODIO()
     auto& particles_sim = frame.get<edm4hep::MCParticleCollection>("MCParticles");
     auto& particles_rec = frame.get<edm4eic::ReconstructedParticleCollection>("ReconstructedChargedParticles");
 
-    auto collectionID_CKF = frame.get<edm4eic::TrackCollection>("CentralCKFTracks").getID();
-    auto collectionID_TM1 = frame.get<edm4eic::TrackCollection>("TaggerTrackerM1LocalTrackAssociations").getID();
-    auto collectionID_TM2 = frame.get<edm4eic::TrackCollection>("TaggerTrackerM2LocalTrackAssociations").getID();
+    collectionID_CKF = frame.get<edm4eic::TrackCollection>("CentralCKFTracks").getID();
+    collectionID_TaggerM1 = frame.get<edm4eic::TrackCollection>("TaggerTrackerM1LocalTrackAssociations").getID();
+    collectionID_TaggerM2 = frame.get<edm4eic::TrackCollection>("TaggerTrackerM2LocalTrackAssociations").getID();
 
     auto& associations = frame.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedChargedParticleAssociations");
+
+    auto mapGen = gen_mapping(associations);
+    auto mapRec = rec_mapping(associations);
 
     auto& clusters_BEMC = frame.get<edm4eic::ClusterCollection>("EcalBarrelClusters");
     auto& clusters_NEMC = frame.get<edm4eic::ClusterCollection>("EcalEndcapNClusters");
@@ -35,18 +43,10 @@ bool MyAnalysis::ReadPODIO()
     auto& clusters_NHCal = frame.get<edm4eic::ClusterCollection>("HcalEndcapNClusters");
     auto& clusters_PHCal = frame.get<edm4eic::ClusterCollection>("LFHCALClusters");
 
-    // Temporarily keeping two different copies of cluster collection ID for ev->Print()...
-    // Don't wanna do friends...
-    ev->collectionID_BEMC = clusters_BEMC.getID();
-    ev->collectionID_NEMC = clusters_NEMC.getID();
-    ev->collectionID_PEMC = clusters_PEMC.getID();
     collectionID_BEMC = clusters_BEMC.getID();
     collectionID_NEMC = clusters_NEMC.getID();
     collectionID_PEMC = clusters_PEMC.getID();
 
-    ev->collectionID_BHCal = clusters_BHCal.getID();
-    ev->collectionID_NHCal = clusters_NHCal.getID();
-    ev->collectionID_PHCal = clusters_PHCal.getID();
     collectionID_BHCal = clusters_BHCal.getID();
     collectionID_NHCal = clusters_NHCal.getID();
     collectionID_PHCal = clusters_PHCal.getID();
@@ -89,16 +89,21 @@ bool MyAnalysis::ReadPODIO()
         // Fill Track info
         for (unsigned int i = 0; i < par.rec.tracks_size(); ++i)
         {
-            if (par.rec.getTracks(i).getObjectID().collectionID == collectionID_CKF) par.track = par.rec.getTracks(i);
-            auto idtrk = par.track.getObjectID().index;
-            if (mapTrackPoint.count(idtrk))
+            auto trk = par.rec.getTracks(i);
+            auto idtrk = trk.getObjectID().index;
+            if (trk.getObjectID().collectionID == collectionID_CKF)
             {
-                par.projection.clear();
-                const auto& points = mapTrackPoint[idtrk];
-                par.projection.insert(par.projection.end(),points.begin(),points.end());
+                par.track = trk;
+                par.nhits = trk.measurements_size();
+
+                if (mapTrackPoint.count(idtrk))
+                {
+                    par.projection.clear();
+                    par.projection.insert(par.projection.end(),mapTrackPoint[idtrk].begin(),mapTrackPoint[idtrk].end());
+                }
             }
 
-            par.tracks.push_back(par.rec.getTracks(i));
+            par.tracks.push_back(trk);
             par.points.push_back({});
             if (mapTrackPoint.count(idtrk))
             {
@@ -128,28 +133,156 @@ bool MyAnalysis::ReadPODIO()
     }
 
 
+
+    // New
+    // Parse simulated particles
+    ev->sim.clear();
+    //ev->sim.reserve(particles_sim.size());
+    for (const auto& par : particles_sim)
+    {
+        int objectID = par.getObjectID().index;
+        auto& sim = ev->sim[objectID];
+        sim.obj = par; // Also store the PODIO obj
+
+        sim.p = TVector3(par.getMomentum().x, par.getMomentum().y, par.getMomentum().z);
+        sim.ene = par.getEnergy();
+        sim.pdg = par.getPDG();
+        sim.vtx = TVector3(par.getVertex().x, par.getVertex().y, par.getVertex().z);
+
+        sim.status = par.getGeneratorStatus();
+        sim.irec.clear();
+        if (mapRec.count(objectID)) for (const auto& rec : mapRec.at(objectID)) sim.irec.push_back(rec.getObjectID().index);
+    }
+
+    // Parse reconstructed particles
+    ev->rec.clear();
+    //ev->rec.reserve(particles_rec.size());
+    for (const auto& par : particles_rec)
+    {
+        int objectID = par.getObjectID().index;
+        auto& rec = ev->rec[objectID];
+        rec.obj = par;
+
+        rec.p = TVector3(par.getMomentum().x, par.getMomentum().y, par.getMomentum().z);
+        rec.ene = 0; // comes from clustering later
+        rec.pdg = par.getPDG();
+        rec.ref = TVector3(par.getReferencePoint().x, par.getReferencePoint().y, par.getReferencePoint().z);
+        if (par.tracks_size() > 0) rec.pos = TVector3(par.getTracks()[0].getPosition().x, par.getTracks()[0].getPosition().y, par.getTracks()[0].getPosition().z);
+
+        // grab track last hit information
+        if (par.tracks_size() > 0)
+        {
+            const auto& trk = par.getTracks()[0];
+            rec.nhits = trk.measurements_size();
+            for (const auto& hit : trk.getMeasurements())
+            {
+                auto id = hit.getSurface();
+                unsigned int det = (id >> 0) & 0xFF;
+
+                if (find(TRACK_HIT_BARREL_DETECTOR_IDS.begin(), TRACK_HIT_BARREL_DETECTOR_IDS.end(), det) != TRACK_HIT_BARREL_DETECTOR_IDS.end()) {rec.is_track_b = true; break;}
+                if (find(TRACK_HIT_NEGATIVE_DETECTOR_IDS.begin(), TRACK_HIT_NEGATIVE_DETECTOR_IDS.end(), det) != TRACK_HIT_NEGATIVE_DETECTOR_IDS.end()) {rec.is_track_n = true; break;}
+                if (find(TRACK_HIT_POSITIVE_DETECTOR_IDS.begin(), TRACK_HIT_POSITIVE_DETECTOR_IDS.end(), det) != TRACK_HIT_POSITIVE_DETECTOR_IDS.end()) {rec.is_track_p = true; break;}
+                if (find(TRACK_HIT_TAGGER_DETECTOR_IDS.begin(), TRACK_HIT_TAGGER_DETECTOR_IDS.end(), det) != TRACK_HIT_TAGGER_DETECTOR_IDS.end()) {rec.is_track_tagger = true; break;}
+            }
+        }
+
+        rec.isim.clear();
+        rec.clusters.clear();
+        rec.clusters_HCal.clear();
+        if (mapGen.count(objectID))
+        {
+            for (const auto& sim : mapGen.at(objectID))
+            {
+                int idsim = sim.getObjectID().index;
+                rec.isim.push_back(idsim); // store gen particle id
+
+                // Truth matching to cluster
+                if (mapBEMC.count(idsim)) for (const auto& c : mapBEMC[idsim]) rec.clusters.push_back(convert_cluster(c, 1, 0));
+                if (mapNEMC.count(idsim)) for (const auto& c : mapNEMC[idsim]) rec.clusters.push_back(convert_cluster(c, 1, 1));
+                if (mapPEMC.count(idsim)) for (const auto& c : mapPEMC[idsim]) rec.clusters.push_back(convert_cluster(c, 1, 2));
+                if (mapBHCal.count(idsim)) for (const auto& c : mapBHCal[idsim]) rec.clusters_HCal.push_back(convert_cluster(c, 0, 0));
+                if (mapNHCal.count(idsim)) for (const auto& c : mapNHCal[idsim]) rec.clusters_HCal.push_back(convert_cluster(c, 0, 1));
+                if (mapPHCal.count(idsim)) for (const auto& c : mapPHCal[idsim]) rec.clusters_HCal.push_back(convert_cluster(c, 0, 2));
+
+                // Truth matching to anything done below
+                // ...
+
+            }
+        }
+
+        for (auto& c : rec.clusters) if (!rec.cluster || rec.cluster->ene < c.ene) rec.cluster = &c;
+        for (auto& c : rec.clusters_HCal) if (!rec.cluster_HCal || rec.cluster_HCal->ene < c.ene) rec.cluster_HCal = &c;
+
+        rec.type = 0;
+        for (auto& idsim : rec.isim)
+        {
+            auto& sim = ev->sim[idsim];
+            if (sim.getGeneratorStatus() == 1) rec.type = REC_TYPE_SIGNAL;
+            if (sim.getGeneratorStatus() == 2001) rec.type = REC_TYPE_SYNRAD;
+            if (sim.getGeneratorStatus() == 3001) rec.type = REC_TYPE_BREMSS;
+            if (sim.getGeneratorStatus() == 4001) rec.type = REC_TYPE_TOUSCH;
+            if (sim.getGeneratorStatus() == 5001) rec.type = REC_TYPE_COULOM;
+            if (rec.type != 0) break;
+        }
+
+    }
+
     return true;
 }
 
+
 // *****************************************************************************
+map<unsigned int, vector<edm4hep::MCParticle>> gen_mapping(const edm4eic::MCRecoParticleAssociationCollection& associations)
+{
+    map<unsigned int, vector<edm4hep::MCParticle>> outmap;
+    for (const auto& asso : associations) outmap[asso.getRec().getObjectID().index].push_back(asso.getSim());
+    return outmap;
+}
+
+map<unsigned int, vector<edm4eic::ReconstructedParticle>> rec_mapping(const edm4eic::MCRecoParticleAssociationCollection& associations)
+{
+    map<unsigned int, vector<edm4eic::ReconstructedParticle>> outmap;
+    for (const auto& asso : associations) outmap[asso.getSim().getObjectID().index].push_back(asso.getRec());
+    return outmap;
+}
+
+
 map<unsigned int, vector<edm4eic::Track>> track_mapping(const edm4eic::MCRecoTrackParticleAssociationCollection& associations)
 {
-    map<unsigned int, vector<edm4eic::Track>> trackmap;
-    for (const auto& asso : associations) trackmap[asso.getSim().getObjectID().index].push_back(asso.getRec());
-    return trackmap;
+    map<unsigned int, vector<edm4eic::Track>> outmap;
+    for (const auto& asso : associations) outmap[asso.getSim().getObjectID().index].push_back(asso.getRec());
+    return outmap;
 }
+
+map<unsigned int, vector<edm4eic::Cluster>> cluster_mapping(const edm4eic::MCRecoClusterParticleAssociationCollection& associations)
+{
+    map<unsigned int, vector<edm4eic::Cluster>> outmap;
+    for (const auto& asso : associations) outmap[asso.getSim().getObjectID().index].push_back(asso.getRec());
+    return outmap;
+}
+
 
 map<unsigned int, vector<edm4eic::TrackPoint>> trackpoint_mapping(const edm4eic::TrackSegmentCollection& projections)
 {
-    std::map<unsigned int, vector<edm4eic::TrackPoint>> tpmap;
-    for (const auto& proj : projections) for (const auto& tp : proj.getPoints()) tpmap[proj.getTrack().getObjectID().index].push_back(tp);
-    return tpmap;
+    map<unsigned int, vector<edm4eic::TrackPoint>> outmap;
+    for (const auto& proj : projections) for (const auto& tp : proj.getPoints()) outmap[proj.getTrack().getObjectID().index].push_back(tp);
+    return outmap;
 }
-
 // *****************************************************************************
-map<unsigned int, vector<edm4eic::Cluster>> cluster_mapping(const edm4eic::MCRecoClusterParticleAssociationCollection& associations)
+
+MyCluster convert_cluster(edm4eic::Cluster c, bool is_ECal, int type)
 {
-    map<unsigned int, vector<edm4eic::Cluster>> clustermap;
-    for (const auto& asso : associations) clustermap[asso.getSim().getObjectID().index].push_back(asso.getRec());
-    return clustermap;
+    MyCluster cc;
+
+    cc.obj = c;
+    cc.is_ECal = is_ECal;
+    cc.is_HCal = !is_ECal;
+    if (type == 0) cc.is_b = true;
+    if (type == 1) cc.is_n = true;
+    if (type == 2) cc.is_p = true;
+
+    cc.ene = c.getEnergy();
+    cc.pos = TVector3(c.getPosition().x, c.getPosition().y, c.getPosition().z);
+
+    return cc;
 }

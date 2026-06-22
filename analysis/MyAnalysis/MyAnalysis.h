@@ -31,6 +31,21 @@
 #include "MyEvent.h"
 #include "MySelectionCriteria.h"
 
+
+// Check definitions.xml and make sure these values are correct in 10 years
+#define BEMC_SYSTEM_ID 101
+#define NEMC_SYSTEM_ID 103
+#define PEMC_SYSTEM_ID 102
+
+#define BHCAL_SYSTEM_ID 111
+#define NHCAL_SYSTEM_ID 113
+#define PHCAL_SYSTEM_ID 116
+
+const vector<int> TRACK_HIT_BARREL_DETECTOR_IDS = {59, 60, 61, 62, 63, 64, 65, 66, 67, 31, 32, 33, 90, 91, 92};
+const vector<int> TRACK_HIT_NEGATIVE_DETECTOR_IDS = {68, 69, 70, 71, 72, 73, 74, 75, 76, 34, 35, 36, 131, 132};
+const vector<int> TRACK_HIT_POSITIVE_DETECTOR_IDS = {77, 78, 79, 80, 81, 82, 83, 37, 38, 39, 120, 121, 122};
+const vector<int> TRACK_HIT_TAGGER_DETECTOR_IDS = {198, 199};
+
 using namespace std;
 
 class MyAnalysis
@@ -48,6 +63,11 @@ public:
     MyEvent* ev;
     unsigned int nev;
 
+    // Tracker ID
+    uint32_t collectionID_CKF;
+    uint32_t collectionID_TaggerM1;
+    uint32_t collectionID_TaggerM2;
+
     // Calorimeter ID
     uint32_t collectionID_BEMC;
     uint32_t collectionID_NEMC;
@@ -55,6 +75,7 @@ public:
     uint32_t collectionID_BHCal;
     uint32_t collectionID_NHCal;
     uint32_t collectionID_PHCal;
+
 
     // Selection Cuts
     // MySelectionCriteria.h
@@ -87,6 +108,8 @@ private:
     // MyAnalysisReconstruction.cxx
     bool TrackClusterMatching(); // EMC
     bool TrackHCalClusterMatching(); // HCAL
+    bool CategorizeEvent(); // Truth-matched calculation
+    bool FindEventQuantities(); //Truth-matched calculation
 
     // MyAnalysisCollection.cxx
     void AnalyzeQA();

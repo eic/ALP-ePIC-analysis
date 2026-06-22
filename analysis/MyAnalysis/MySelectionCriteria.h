@@ -15,6 +15,7 @@ public:
     float Max_Lepton_Eta;
     float Min_Lepton_Eta;
     float Min_Lepton_Pt;
+    float Min_Lepton_P;
 
     float Max_Decay_Eta;
     float Min_Decay_Eta;
@@ -35,6 +36,7 @@ public:
         Max_Lepton_Eta = 4.0;
         Min_Lepton_Eta = -4.0;
         Min_Lepton_Pt = 0.5;
+        Min_Lepton_P = 0.5;
 
         Max_Decay_Eta = 4.0;
         Min_Decay_Eta = -4.0;

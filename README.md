@@ -2,6 +2,7 @@
 Simulation and analysis of electrophilic Axion-Like Particle (ALP) production processes at the Electron-Ion Collider (ePIC).
 
 ## Requirements
+0. Please review [this](https://github.com/eic/ALP-ePIC) page for event generation.
 1. **eic-shell**: Latest installation of the EIC container environment. ([Link](https://github.com/eic/eic-shell))
 2. **MadGraph5_aMC@NLO (v3.5.13)**: Working installation with the following internal dependencies. ([Link](https://launchpad.net/mg5amcnlo))
    * From the MG5 console, ensure the following are installed:
@@ -15,10 +16,15 @@ Simulation and analysis of electrophilic Axion-Like Particle (ALP) production pr
 
 ## Quick Start
 1. Clone this repository:
-   ```bash
-   git clone https://github.com/eic/ALP-ePIC.git
-   ```
-2. Run the simulation production:
-   ```bash
-   ./bin/mg5_aMC cards/aem_axem.txt
-   ```
+  ```bash
+  git clone https://github.com/eic/ALP-ePIC-analysis.git
+  ```
+2. Compile the library:
+  ```bash
+  cd ALP-ePIC-analysis/analysis
+  make
+  ```
+3. Run the starter macro in ALP-ePIC-analysis/analysis/macros/analysis.C
+  ```bash
+  root -b -q -l macros/analysis.C("$INPUTFILE","$OUTPUTFILE")
+  ```
