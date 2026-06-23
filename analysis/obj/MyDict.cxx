@@ -59,7 +59,7 @@ namespace ROOT {
       ::MyCluster *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyCluster));
       static ::ROOT::TGenericClassInfo 
-         instance("MyCluster", "MyEvent.h", 21,
+         instance("MyCluster", "MyEvent.h", 35,
                   typeid(::MyCluster), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &MyCluster_Dictionary, isa_proxy, 4,
                   sizeof(::MyCluster) );
@@ -104,7 +104,7 @@ namespace ROOT {
       ::MyGeneratedParticle *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyGeneratedParticle));
       static ::ROOT::TGenericClassInfo 
-         instance("MyGeneratedParticle", "MyEvent.h", 52,
+         instance("MyGeneratedParticle", "MyEvent.h", 66,
                   typeid(::MyGeneratedParticle), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &MyGeneratedParticle_Dictionary, isa_proxy, 4,
                   sizeof(::MyGeneratedParticle) );
@@ -149,7 +149,7 @@ namespace ROOT {
       ::MyReconstructedParticle *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyReconstructedParticle));
       static ::ROOT::TGenericClassInfo 
-         instance("MyReconstructedParticle", "MyEvent.h", 81,
+         instance("MyReconstructedParticle", "MyEvent.h", 95,
                   typeid(::MyReconstructedParticle), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &MyReconstructedParticle_Dictionary, isa_proxy, 4,
                   sizeof(::MyReconstructedParticle) );
@@ -194,7 +194,7 @@ namespace ROOT {
       ::MyParticle *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyParticle));
       static ::ROOT::TGenericClassInfo 
-         instance("MyParticle", "MyEvent.h", 149,
+         instance("MyParticle", "MyEvent.h", 165,
                   typeid(::MyParticle), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &MyParticle_Dictionary, isa_proxy, 4,
                   sizeof(::MyParticle) );
@@ -239,7 +239,7 @@ namespace ROOT {
       ::MyEvent *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyEvent));
       static ::ROOT::TGenericClassInfo 
-         instance("MyEvent", "MyEvent.h", 245,
+         instance("MyEvent", "MyEvent.h", 261,
                   typeid(::MyEvent), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &MyEvent_Dictionary, isa_proxy, 4,
                   sizeof(::MyEvent) );

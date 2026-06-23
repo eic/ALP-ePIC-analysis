@@ -217,11 +217,11 @@ bool MyAnalysis::ReadPODIO()
         for (auto& idsim : rec.isim)
         {
             auto& sim = ev->sim[idsim];
-            if (sim.getGeneratorStatus() == 1) rec.type = REC_TYPE_SIGNAL;
-            if (sim.getGeneratorStatus() == 2001) rec.type = REC_TYPE_SYNRAD;
-            if (sim.getGeneratorStatus() == 3001) rec.type = REC_TYPE_BREMSS;
-            if (sim.getGeneratorStatus() == 4001) rec.type = REC_TYPE_TOUSCH;
-            if (sim.getGeneratorStatus() == 5001) rec.type = REC_TYPE_COULOM;
+            if (sim.obj.getGeneratorStatus() == 1) rec.type = REC_TYPE_SIGNAL;
+            if (sim.obj.getGeneratorStatus() == 2001) rec.type = REC_TYPE_SYNRAD;
+            if (sim.obj.getGeneratorStatus() == 3001) rec.type = REC_TYPE_BREMSS;
+            if (sim.obj.getGeneratorStatus() == 4001) rec.type = REC_TYPE_TOUSCH;
+            if (sim.obj.getGeneratorStatus() == 5001) rec.type = REC_TYPE_COULOM;
             if (rec.type != 0) break;
         }
 
