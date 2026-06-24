@@ -1,16 +1,17 @@
 #!/bin/bash
-script="/gpfs/mnt/gpfs02/eic/namjae/madgraph/analysis/scripts/run_analysis.sh"
+script="/gpfs/mnt/gpfs02/eic/awheeler/large_jobs/ALP-ePIC-analysis/analysis/scripts/run_analysis.sh"
 infile=$1
 outfile=$2
-remake=$3
+treefile=$3
+remake=$4
 
 
-if [[ "$#" -lt 2 || "$#" -gt 3 ]]; then
-    echo "Usage: bash test.sh <input_file> <output_file>"
-    echo "Usage: bash test.sh <input_file> <output_file> <recompile_library>"
+if [[ "$#" -lt 3 || "$#" -gt 4 ]]; then
+    echo "Usage: bash test.sh <input_file> <output_file> <treefile>"
+    echo "Usage: bash test.sh <input_file> <output_file> <treefile> <recompile_library>"
 fi
 
-if [ "$#" -eq 2 ]; then
+if [ "$#" -eq 3 ]; then
     remake=1
 fi
 
@@ -25,4 +26,4 @@ fi
 
 read -n 1 -s -r -p "Press any key to continue..."
 
-$script $infile $outfile
+$script $infile $outfile $treefile

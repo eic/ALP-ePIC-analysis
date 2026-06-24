@@ -54,14 +54,18 @@ private:
     // IO
     string mInFileName;
     string mOutFileName;
+    string bdtFileName; //AW 20260623
+
     podio::ROOTReader* mReader;
     TFile* mOutFile;
+    TFile* bdtFile; //AW 20260623
 
 public:
     // Event Instances
     podio::Frame frame;
     MyEvent* ev;
     unsigned int nev;
+    int file_type; // AW 20260623
 
     // Tracker ID
     uint32_t collectionID_CKF;
@@ -86,9 +90,11 @@ public:
     map<string,TH2*> h2;
     map<string,TH3*> h3;
 
+    TTree* bdtTree; //AW 20260623
+
 public:
     MyAnalysis();
-    MyAnalysis(string ifname, string ofname);
+    MyAnalysis(string ifname, string ofname, string treename);
     ~MyAnalysis();
 
     bool Run();
@@ -110,6 +116,7 @@ private:
     bool TrackHCalClusterMatching(); // HCAL
     bool CategorizeEvent(); // Truth-matched calculation
     bool FindEventQuantities(); //Truth-matched calculation
+    bool WriteToBdtTree(); // AW 20260623
 
     // MyAnalysisCollection.cxx
     void AnalyzeQA();
@@ -117,6 +124,7 @@ private:
     void AnalyzeResolution();
     void AnalyzeMatching();
     void AnalyzeDecayVertex();
+    void AnalyzeBdtVariables();
 
     void AnalyzeElectronIdentification();
 

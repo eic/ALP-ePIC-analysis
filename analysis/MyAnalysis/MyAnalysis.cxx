@@ -21,10 +21,11 @@ MyAnalysis::MyAnalysis()
     cuts.LoadDefault();
 }
 
-MyAnalysis::MyAnalysis(string ifname, string ofname)
+MyAnalysis::MyAnalysis(string ifname, string ofname, string treename)
 {
     mInFileName = ifname;
     mOutFileName = ofname;
+    bdtFileName = treename; //AW 20260623
 
     cuts.LoadDefault();
 }
@@ -34,6 +35,7 @@ MyAnalysis::~MyAnalysis()
 {
     delete mReader;
     delete mOutFile;
+    delete bdtFile;
     delete ev;
 }
 
@@ -61,11 +63,55 @@ bool MyAnalysis::Init()
     mReader->openFile(mInFileName);
 
     mOutFile = new TFile(TString(mOutFileName), "recreate");
+    bdtFile = new TFile(TString(bdtFileName), "recreate"); // AW 20260623
+
+    bdtTree = new TTree("tree","tree"); // AW 20260623
+
     mOutFile->cd();
     ReserveHistograms();
 
     nev = 0;
     ev = new MyEvent();
+
+    // AW 20260623
+    bdtTree->Branch("Event_Number",&(ev->bdt_nev));
+    bdtTree->Branch("Signal_Background_Label",&(ev->sig_bkgd_label));
+    bdtTree->Branch("Electron_Energy", &(ev->bdt_elec_e));
+    bdtTree->Branch("Transverse_Momentum",&(ev->bdt_pt));
+    bdtTree->Branch("Eta",&(ev->bdt_eta));
+    bdtTree->Branch("Electron_to_Beam_Energy_Ratio", &(ev->bdt_elec_beam_rat));
+    bdtTree->Branch("Missing_Pt",&(ev->bdt_pt_miss));
+    bdtTree->Branch("Momentum", &(ev->bdt_p));
+    bdtTree->Branch("Phi", &(ev->bdt_phi));
+    bdtTree->Branch("Q2", &(ev->bdt_q2));
+    bdtTree->Branch("Opening_Angle_between_Beam_and_Particle", &(ev->bdt_angle));
+    bdtTree->Branch("Multiplicity", &(ev->bdt_mult));
+    bdtTree->Branch("Roman_Pots", &(ev->bdt_RP)); // WIP
+    bdtTree->Branch("ZDC", &(ev->bdt_ZDC)); // WIP
+    bdtTree->Branch("B0", &(ev->bdt_b0)); // WIP
+    bdtTree->Branch("Delta_R", &(ev->bdt_dr));
+    bdtTree->Branch("elect_ecal_clusters_minus_pz", &(ev->bdt_e_pz));
+    bdtTree->Branch("Ecal_clusters_e", &(ev->bdt_et));
+    bdtTree->Branch("perp_p", &(ev->bdt_pperp));
+    bdtTree->Branch("pperp_sqrt_et_ratio", &(ev->bdt_et_pperp));
+    bdtTree->Branch("Delta_Phi", &(ev->bdt_dphi));
+    bdtTree->Branch("Delta_Phi_Average", &(ev->bdt_dphi_avg));
+
+    //AW 20260623
+    string incl_signal = "aem_axem";
+    string decay_signal = "aem_ax_emmupmum";
+    string dis_bkgd = "dis";
+    string DIS_bkgd = "DIS";
+    string qed_bkgd = "qed_compton";
+
+    //AW 20260623
+    file_type = -1;
+    if(mInFileName.find(incl_signal) !=std::string::npos){file_type = 0;}
+    if(mInFileName.find(decay_signal) !=std::string::npos){file_type = 1;}
+    if(mInFileName.find(dis_bkgd) !=std::string::npos){file_type = 2;}
+    if(mInFileName.find(DIS_bkgd) !=std::string::npos){file_type = 2;}
+    if(mInFileName.find(qed_bkgd) !=std::string::npos){file_type = 3;}
+
 
     collectionID_CKF = 0;
     collectionID_TaggerM1 = 0;
@@ -84,6 +130,10 @@ bool MyAnalysis::Init()
 // *****************************************************************************
 bool MyAnalysis::End()
 {
+    bdtTree->Write(); //AW 20260623
+    bdtFile->Write(); //AW 20260623
+    bdtFile->Close(); //AW 20260623
+    
     mOutFile->Write();
     mOutFile->Close();
     return true;
@@ -104,6 +154,7 @@ bool MyAnalysis::Next()
     TrackHCalClusterMatching();
     FindEventQuantities();
     CategorizeEvent();
+    WriteToBdtTree(); // AW 20260623
 
 
     // Your Analysis begins here
@@ -113,6 +164,7 @@ bool MyAnalysis::Next()
     AnalyzeResolution();
     AnalyzeMatching();
     AnalyzeDecayVertex();
+    AnalyzeBdtVariables();
 
     AnalyzeElectronIdentification();
     // Your Analysis ends here

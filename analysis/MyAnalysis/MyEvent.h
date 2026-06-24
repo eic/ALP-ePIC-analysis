@@ -289,6 +289,12 @@ public:
     float q2true;
     TVector3 pmisstrue;
 
+    int bdt_nev, sig_bkgd_label;
+    float bdt_elec_e, bdt_pt, bdt_eta, bdt_elec_beam_rat, bdt_pt_miss, bdt_p, bdt_phi, bdt_q2, bdt_angle;
+    int bdt_mult; //multiplicity
+    float bdt_RP, bdt_ZDC, bdt_b0; // WIP
+    float bdt_dr, bdt_e_pz, bdt_et, bdt_pperp, bdt_et_pperp, bdt_dphi, bdt_dphi_avg;
+
 
     MyEvent()
     {
@@ -324,6 +330,33 @@ public:
         pmiss = TVector3(0,0,0);
         q2true = 0;
         pmisstrue = TVector3(0,0,0);
+
+        //AW 20260605
+        bdt_nev = 0;
+        sig_bkgd_label = -1;
+        bdt_elec_e = 0; 
+        bdt_pt = 0;
+        bdt_eta = 0;
+        bdt_elec_beam_rat = 0;
+        bdt_pt_miss = 0;
+        bdt_p = 0;
+        bdt_phi = 0;
+        bdt_q2 = 0;
+        bdt_angle = 0;
+
+        bdt_mult = 0;
+        bdt_RP = 0; // WIP
+        bdt_ZDC = 0; // WIP
+        bdt_b0 = 0; // WIP
+
+        //AW 20260622 new bdt values
+        bdt_dr = 0; 
+        bdt_e_pz = 0;
+        bdt_et = 0;
+        bdt_pperp = 0;
+        bdt_et_pperp = 0;
+        bdt_dphi = 0;
+        bdt_dphi_avg = 0;
     }
 
     edm4eic::ReconstructedParticle GetFinalLepton()

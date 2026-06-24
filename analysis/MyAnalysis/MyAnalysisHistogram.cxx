@@ -3,6 +3,7 @@
 vector<float> logbinning(int nbins, float x1, float x2);
 vector<float> binning(int nbins, float x1, float x2);
 void reserve_qa_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
+void reserve_bdt_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3); //AW 20260623
 void reserve_eff_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
 void reserve_res_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
 void reserve_match_EMC_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
@@ -44,6 +45,7 @@ void MyAnalysis::ReserveHistograms()
 
     // QA histograms
     reserve_qa_histograms(h1, h2, h3);
+    reserve_bdt_histograms(h1, h2, h3); // AW 20260623
     reserve_eff_histograms(h1, h2, h3);
     reserve_res_histograms(h1, h2, h3);
     reserve_match_EMC_histograms(h1, h2, h3);
@@ -255,7 +257,47 @@ void reserve_qa_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<strin
     h3["QA_sim_decay__pTe_pT_charge"] = new TH3F("QA_sim_decay__pTe_pT_charge", ";Generated p_{T,e} (GeV);#eta", pTbins.size() - 1, &pTbins[0], pTbins.size() - 1, &pTbins[0], chargebins.size() - 1, &chargebins[0]);
 }
 
+void reserve_bdt_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3){
+    //AW 20260623
 
+    h1["bdt_elec_e"] = new TH1F("bdt_elec_e","Energy of the Electron or highest p_{T} particle",pTbins.size() - 1, &pTbins[0]); //etc etc etc
+    h1["bdt_pt"] = new TH1F("bdt_pt","Transverse Momentum p_{T}",pTbins.size() - 1, &pTbins[0]); //etc etc etc
+    h1["bdt_eta"] = new TH1F("bdt_eta","Pseudorapidity #eta",etabins.size() - 1, &etabins[0]); //etc etc etc
+    h1["bdt_elec_beam_rat"] = new TH1F("bdt_elec_beam_rat","Energy_{e}/Energy_{beam} ratio",100,-5,5); //etc etc etc
+    h1["bdt_pt_miss"] = new TH1F("bdt_pt_miss","Missing p_{T}",pTbins.size() - 1, &pTbins[0]); //etc etc etc
+    h1["bdt_p"] = new TH1F("bdt_p","Momentum of the Electron p_{e}",pbins.size() - 1, &pbins[0]); //etc etc etc
+    h1["bdt_phi"] = new TH1F("bdt_phi","Phi",phibins.size() - 1, &phibins[0]); //etc etc etc
+    h1["bdt_sig_label"] = new TH1F("bdt_sig_label","Signal or Background label",4,-1,2); //etc etc etc
+    h1["bdt_q2"] = new TH1F("bdt_q2","Q^{2} Momentum Transfer",q2bins.size() - 1, &q2bins[0]); //etc etc etc
+    h1["bdt_angle"] = new TH1F("bdt_angle","Opening Angle between the Beam and Scattered Particle",phibins.size() - 1, &phibins[0]); //etc etc etc
+
+    //DIS electron:
+    h1["dis_elec_e"] = new TH1F("dis_elec_e","Energy of the Electron or highest p_{T} particle",pTbins.size() - 1, &pTbins[0]); //etc etc etc
+    h1["dis_elec_pt"] = new TH1F("dis_elec_pt","Transverse Momentum p_{T}",pTbins.size() - 1, &pTbins[0]); //etc etc etc
+    h1["dis_elec_eta"] = new TH1F("dis_elec_eta","Pseudorapidity #eta",etabins.size() - 1, &etabins[0]); //etc etc etc
+    h1["dis_elec_beam_rat"] = new TH1F("dis_elec_beam_rat","Energy_{e}/Energy_{beam} ratio",100,-5,5); //etc etc etc
+    h1["dis_elec_p"] = new TH1F("dis_elec_p","Momentum of the Electron p_{e}",pbins.size() - 1, &pbins[0]); //etc etc etc
+    h1["dis_elec_phi"] = new TH1F("dis_elec_phi","Phi",phibins.size() - 1, &phibins[0]); //etc etc etc
+    h1["dis_elec_q2"] = new TH1F("dis_elec_q2","Q^{2} Momentum Transfer",q2bins.size() - 1, &q2bins[0]); //etc etc etc
+    h1["dis_elec_angle"] = new TH1F("dis_elec_angle","Opening Angle between the Beam and Scattered Electron",phibins.size() - 1, &phibins[0]); //etc etc etc
+
+    //DIS for all particles
+    h1["dis_e"] = new TH1F("dis_e","Energy of the Electron or highest p_{T} particle",pTbins.size() - 1, &pTbins[0]); //etc etc etc
+    h1["dis_pt"] = new TH1F("dis_pt","Transverse Momentum p_{T}",pTbins.size() - 1, &pTbins[0]); //etc etc etc
+    h1["dis_eta"] = new TH1F("dis_eta","Pseudorapidity #eta",etabins.size() - 1, &etabins[0]); //etc etc etc
+    h1["dis_p"] = new TH1F("dis_p","Momentum of the Electron p_{e}",pbins.size() - 1, &pbins[0]); //etc etc etc
+    h1["dis_phi"] = new TH1F("dis_phi","Phi",phibins.size() - 1, &phibins[0]); //etc etc etc
+
+    //AW 20260622 more BDT values:
+    h1["bdt_dr"] = new TH1F("bdt_dr","Delta_R",dRbins.size() - 1, &dRbins[0]); //etc etc etc
+    h1["bdt_e_pz"] = new TH1F("bdt_e_pz","elect_ecal_clusters_minus_pz",pbins.size() - 1, &pbins[0]); //etc etc etc
+    h1["bdt_et"] = new TH1F("bdt_et","Ecal_clusters_e",pbins.size() - 1, &pbins[0]); //etc etc etc
+    h1["bdt_pperp"] = new TH1F("bdt_pperp","perp_p",pbins.size() - 1, &pbins[0]); //etc etc etc
+    h1["bdt_et_pperp"] = new TH1F("bdt_et_pperp","pperp_sqrt_et_ratio",pbins.size() - 1, &pbins[0]); //etc etc etc
+    h1["bdt_dphi"] = new TH1F("bdt_dphi","Delta_Phi",phibins.size() - 1, &phibins[0]); //etc etc etc
+    h1["bdt_dphi_avg"] = new TH1F("bdt_dphi_avg","Delta_Phi_Average",phibins.size() - 1, &phibins[0]); //etc etc etc
+
+}
 
 
 

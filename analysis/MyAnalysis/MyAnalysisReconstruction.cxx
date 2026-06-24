@@ -279,3 +279,140 @@ int generate_bitmask(bool is_track_b, bool is_track_n, bool is_track_p, bool is_
     if (is_track_t) bitmask |= (1 << 6);
     return bitmask;
 }
+
+bool MyAnalysis::WriteToBdtTree()
+{
+    if(ev->rec.size() == 0){
+        //if nothing is reconstructed, continue
+        return true;
+    }
+    //###################### Write to Branches of the new flat TTree format!!!################
+    //AW 20260604
+    ev->bdt_nev = nev;
+    ev->bdt_mult = ev->rec.size();
+
+    TVector3 bdt_particle;
+    TVector3 bdt_beam;
+    TVector3 bdt_alp = ev->pmiss;
+    float particle_mass = 0;
+    float beam_mass = 0;
+    float smallest_phi = 1000;
+
+    if((file_type == 2) || (file_type==3) || (file_type==0) || (file_type==1)){
+        //find the highest pt electron for the event
+        int max_index = -1;
+        float max,pt;
+        max = 0;
+        pt = 0;
+
+        ev->sig_bkgd_label = ((file_type==0) || (file_type==1)) ? 1 : 0; // 1 = signal, 0 = background;
+
+        TVector3 temp;
+        TVector3 temp_sum = TVector3(0,0,0);
+
+        float dphi = 0;
+        for(map<int,MyReconstructedParticle>::const_iterator itr = ev->rec.begin(); itr!= ev->rec.end(); ++itr){
+            //for(int i =0;i<ev->particles_rec.size();i++){
+            //if it falls into the low Q^2 tagger, just ignore it!!!
+            if(itr->second.type != 1){continue;}
+            if(itr->second.is_track_tagger == true){continue;}
+
+            temp = TVector3(itr->second.obj.getMomentum().x,itr->second.obj.getMomentum().y,itr->second.obj.getMomentum().z);
+            ev->bdt_dphi_avg += abs(bdt_alp.DeltaPhi(temp)); // take the average of the absolute value of all of them??
+            pt = TMath::Sq(itr->second.obj.getMomentum().x)+TMath::Sq(itr->second.obj.getMomentum().y);//this may be a funciton??
+
+            temp_sum = temp_sum + temp; // sum for the bdt_pperp
+
+            if((itr->second.obj.getPDG() == 11) && (pt > max)){
+                max = pt; // index of the max
+                max_index = itr->first; //this is the objectID essentially!!!
+            }
+
+            dphi = bdt_alp.DeltaPhi(temp);
+            if(dphi < smallest_phi){smallest_phi = dphi;}
+
+            //getting the sum of ALL energy deposits in the calorimeter for reconstructed particles???
+            if(itr->second.obj.clusters_size() > 0){
+                for(vector<edm4eic::Cluster>::const_iterator itr2 = itr->second.obj.clusters_begin(); itr2 != itr->second.obj.clusters_end(); ++itr2){
+                    ev->bdt_et += ((*itr2).getEnergy()*TMath::Sin(temp.Theta()));
+                }
+            }
+            if(itr->second.obj.clusters_size() == 0){
+                //if there's no cluster for the rec. particle
+                ev->bdt_et = (itr->second.obj.getEnergy()*TMath::Sin(temp.Theta()));
+            }
+
+            temp.Clear();
+        }
+
+        ev->bdt_pperp = temp_sum.Perp();
+
+        TVector3 elec_high;
+        TVector3 not_elec;
+
+        float beam_temp = 0;
+
+        //get the electron beam!
+        for(map<int,MyGeneratedParticle>::const_iterator itr = ev->sim.begin(); itr!= ev->sim.end(); ++itr){
+            //for (auto& par : ev->particles_sim){
+            if (itr->second.obj.getGeneratorStatus() == 4 && itr->second.obj.getPDG() != 11)
+            {   //want to get the beam!!! Honestly I don't know if this even makes sense....
+                not_elec = TVector3(itr->second.obj.getMomentum().x,itr->second.obj.getMomentum().y,itr->second.obj.getMomentum().z);
+                beam_temp = itr->second.obj.getMass();
+            }
+            if(itr->second.obj.getGeneratorStatus() == 4 && itr->second.obj.getPDG() == 11){
+                elec_high = TVector3(itr->second.obj.getMomentum().x,itr->second.obj.getMomentum().y,itr->second.obj.getMomentum().z);
+            }
+        }
+
+        particle_mass = ev->rec[max_index].obj.getMass();    
+        bdt_beam = (ev->rec[max_index].obj.getPDG() == 11) ? elec_high : not_elec;
+        beam_mass = (ev->rec[max_index].obj.getPDG() == 11) ? 0.000511 : beam_temp; // AW 20260618 new
+        bdt_particle = TVector3(ev->rec[max_index].obj.getMomentum().x,ev->rec[max_index].obj.getMomentum().y,ev->rec[max_index].obj.getMomentum().z); // just for now, syntax is wrong!!
+    
+        //use max pt elec index, already selected for the electron
+        if(ev->rec[max_index].obj.clusters_size() > 0){
+            for(vector< edm4eic::Cluster >::const_iterator itr = ev->rec[max_index].obj.clusters_begin(); itr != ev->rec[max_index].obj.clusters_end(); ++itr){
+                ev->bdt_e_pz += ((*itr).getEnergy()*(1-TMath::Cos(bdt_particle.Theta())));
+            }
+            ev->bdt_e_pz = ev->bdt_e_pz - bdt_particle.Pz();
+        }
+        if(ev->rec[max_index].obj.clusters_size() == 0){
+            ev->bdt_e_pz = (ev->rec[max_index].obj.getEnergy()*(1-TMath::Cos(bdt_particle.Theta())));
+            ev->bdt_e_pz = ev->bdt_e_pz - bdt_particle.Pz();
+        }
+
+        elec_high.Clear();
+        not_elec.Clear();
+    }
+
+    if((bdt_particle.Mag() > 0.5) && (abs(bdt_particle.Eta()) < 4)){
+
+        ev->bdt_elec_e = TMath::Sqrt(TMath::Sq(bdt_particle.Mag()) + TMath::Sq(particle_mass)); // AW 20260618
+        ev->bdt_pt = bdt_particle.Pt();
+        ev->bdt_eta = bdt_particle.Eta();
+        ev->bdt_elec_beam_rat = (ev->bdt_elec_e)/(TMath::Sqrt(TMath::Sq(bdt_beam.Mag()) + TMath::Sq(beam_mass))); // AW 20260618
+        ev->bdt_pt_miss = bdt_alp.Pt();
+        ev->bdt_p = TMath::Sqrt(TMath::Sq(bdt_particle.Px())+TMath::Sq(bdt_particle.Py())+TMath::Sq(bdt_particle.Pz())); 
+        ev->bdt_phi = bdt_particle.Phi();
+        ev->bdt_q2 = 2 * ev->bdt_elec_e * TMath::Sqrt(TMath::Sq(bdt_beam.Mag()) + TMath::Sq(beam_mass)) * (1.0 - cos(bdt_beam.Theta() - bdt_particle.Theta()));;
+        ev->bdt_angle = bdt_particle.Theta(); //opening angle between the beam and the electron
+        
+        ev->bdt_RP = 0; // WIP
+        ev->bdt_ZDC = 0; // WIP
+        ev->bdt_b0 = 0; // WIP
+
+        ev->bdt_dr = bdt_alp.DeltaR(bdt_particle);
+        ev->bdt_et_pperp = ev->bdt_pperp/TMath::Sqrt(ev->bdt_et);
+        ev->bdt_dphi = smallest_phi;
+        ev->bdt_dphi_avg = (ev->bdt_dphi_avg)/(ev->particles_rec.size());
+    }
+    else{
+        return true;
+    }
+
+    bdtTree->Fill();
+
+    //########################################################################################
+    return true;
+}

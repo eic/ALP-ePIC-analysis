@@ -451,3 +451,56 @@ void MyAnalysis::AnalyzeElectronIdentification()
         // Look at defintions.xml
     }
 }
+
+// AW 20260623
+void MyAnalysis::AnalyzeBdtVariables(){
+    // Fill into 1D histograms
+    h1["bdt_elec_e"]->Fill(ev->bdt_elec_e);
+    h1["bdt_pt"]->Fill(ev->bdt_pt);
+    h1["bdt_eta"]->Fill(ev->bdt_eta);
+    h1["bdt_elec_beam_rat"]->Fill(ev->bdt_elec_beam_rat);
+    h1["bdt_pt_miss"]->Fill(ev->bdt_pt_miss);
+    h1["bdt_p"]->Fill(ev->bdt_p);
+    h1["bdt_phi"]->Fill(ev->bdt_phi);
+    h1["bdt_sig_label"]->Fill(ev->sig_bkgd_label);
+    h1["bdt_q2"]->Fill(ev->bdt_q2);
+    h1["bdt_angle"]->Fill(ev->bdt_angle);
+    h1["bdt_dr"]->Fill(ev->bdt_dr);
+    h1["bdt_e_pz"]->Fill(ev->bdt_e_pz);
+    h1["bdt_et"]->Fill(ev->bdt_et);
+    h1["bdt_pperp"]->Fill(ev->bdt_pperp);
+    h1["bdt_et_pperp"]->Fill(ev->bdt_et_pperp);
+    h1["bdt_dphi"]->Fill(ev->bdt_dphi);
+    h1["bdt_dphi_avg"]->Fill(ev->bdt_dphi_avg);
+
+    if(file_type == 2){ //If it's a DIS file, looking at all particles
+        TVector3 dis_particle;
+        for(map<int,MyReconstructedParticle>::const_iterator itr = ev->rec.begin(); itr!= ev->rec.end(); ++itr){
+            dis_particle = TVector3(itr->second.obj.getMomentum().x,itr->second.obj.getMomentum().y,itr->second.obj.getMomentum().z); // establish the particle,
+            h1["dis_e"]->Fill(TMath::Sqrt(TMath::Sq(dis_particle.Mag()) + TMath::Sq(itr->second.obj.getMass())));
+            h1["dis_pt"]->Fill(dis_particle.Pt());
+            h1["dis_eta"]->Fill(dis_particle.Eta());
+            h1["dis_p"]->Fill(TMath::Sqrt(TMath::Sq(dis_particle.Px())+TMath::Sq(dis_particle.Py())+TMath::Sq(dis_particle.Pz())));
+            h1["dis_phi"]->Fill(dis_particle.Phi());
+            dis_particle.Clear();
+        }
+        
+        TVector3 dis_electron;
+
+        for(map<int,MyGeneratedParticle>::const_iterator itr = ev->sim.begin(); itr!= ev->sim.end(); ++itr){ // looking at DIS electrons
+            if(ev->rec[itr->first].type != 1){continue;} // if it's not the DIS signal
+            if(itr->second.obj.getPDG() == 11 && itr->second.obj.getGeneratorStatus() == 1){ 
+                dis_electron = TVector3(ev->rec[itr->first].obj.getMomentum().x, ev->rec[itr->first].obj.getMomentum().y, ev->rec[itr->first].obj.getMomentum().z);
+                h1["dis_elec_e"]->Fill(TMath::Sqrt(TMath::Sq(dis_electron.Mag()) + TMath::Sq(ev->rec[itr->first].obj.getMass())));
+                h1["dis_elec_pt"]->Fill(dis_electron.Pt());
+                h1["dis_elec_eta"]->Fill(dis_electron.Eta());
+                h1["dis_elec_beam_rat"]->Fill(TMath::Sqrt(TMath::Sq(dis_electron.Mag()) + TMath::Sq(ev->rec[itr->first].obj.getMass()))/TMath::Sqrt(TMath::Sq(ev->pbeam.Mag()) + TMath::Sq(0.000511))); //do I need to do this one?
+                h1["dis_elec_p"]->Fill(TMath::Sqrt(TMath::Sq(dis_electron.Px())+TMath::Sq(dis_electron.Py())+TMath::Sq(dis_electron.Pz())));
+                h1["dis_elec_phi"]->Fill(dis_electron.Phi());
+                h1["dis_elec_q2"]->Fill(2 * TMath::Sqrt(TMath::Sq(dis_electron.Mag()) + TMath::Sq(ev->rec[itr->first].obj.getMass())) * TMath::Sqrt(TMath::Sq(ev->pbeam.Mag()) + TMath::Sq(0.000511)) * (1.0 - cos(ev->pbeam.Theta() - dis_electron.Theta()))); //should I compare to a ion beam or the electron beam???
+                h1["dis_elec_angle"]->Fill(dis_electron.Theta());
+                dis_electron.Clear();
+            }
+        }
+    }
+}
