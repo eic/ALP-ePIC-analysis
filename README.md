@@ -26,5 +26,5 @@ Simulation and analysis of electrophilic Axion-Like Particle (ALP) production pr
   ```
 3. Run the starter macro in ALP-ePIC-analysis/analysis/macros/analysis.C
   ```bash
-  root -b -q -l macros/analysis.C("$INPUTFILE","$OUTPUTFILE")
+  root -b -q -l macros/analysis.C("$INPUTFILE","$OUTPUTFILE","$TREEFILE")
   ```
