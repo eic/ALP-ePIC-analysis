@@ -7,6 +7,7 @@ void reserve_eff_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<stri
 void reserve_res_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
 void reserve_match_EMC_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
 void reserve_cluster_QA_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
+void reserve_background_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3);
 
 // *****************************************************************************
 vector<float> pTbins = binning(100, 0, 5);
@@ -14,6 +15,9 @@ vector<float> etabins = binning(100, -10, 10);
 vector<float> phibins = binning(100, -TMath::Pi(), TMath::Pi());
 vector<float> pTbins_coarse = binning(20, 0, 5);
 vector<float> etabins_coarse = binning(20, -10, 10);
+vector<float> detabins = binning(100, 0, 5);
+vector<float> dphibins = binning(100, 0, TMath::Pi());
+
 
 vector<float> pbins = binning(100, 0, 10);
 vector<float> dRbins = binning(100, 0, 0.1);
@@ -25,10 +29,12 @@ vector<float> ecalbins = binning(5, 0, 5);
 vector<float> sbins = binning(20, 0, 20);
 vector<float> q2bins = logbinning(200, 0.001, 1000.0);
 vector<float> ratbins = binning(100, 0, 2);
+vector<float> ratbins_wide = binning(100, 0, 3);
 vector<float> fracbins = binning(100, 0, 1);
 vector<float> maskbins = binning(129, 0, 129);
-
 vector<float> chargebins = binning(2, -2, 2);
+
+vector<float> typebins = binning(10, 0, 10);
 
 
 // *****************************************************************************
@@ -48,6 +54,7 @@ void MyAnalysis::ReserveHistograms()
     reserve_res_histograms(h1, h2, h3);
     reserve_match_EMC_histograms(h1, h2, h3);
     reserve_cluster_QA_histograms(h1, h2, h3);
+    reserve_background_histograms(h1, h2, h3);
 
     for (map<string,TH1*>::const_iterator itr = h1.begin(); itr != h1.end(); ++itr) itr->second->Sumw2();
     for (map<string,TH2*>::const_iterator itr = h2.begin(); itr != h2.end(); ++itr) itr->second->Sumw2();
@@ -65,6 +72,44 @@ void reserve_cluster_QA_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, m
 }
 
 
+void reserve_background_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3)
+{
+    // Against Machine Background
+    // Vertex, track multiplicity, hit multiplicity, E-Pz, pT
+    h1["QA_BGR_Event__ntrks"] = new TH1F("QA_BGR_Event__ntrks", ";N_{trk}", 50, 0, 50);
+    h1["QA_BGR_Event__empz"] = new TH1F("QA_BGR_Event__empz", ";E-P_{z}", 100, 0, 50);
+    h1["QA_BGR_Event__pTsqrtET"] = new TH1F("QA_BGR_Event__pTsqrtET", ";p_{T}/#sqrt{E_{T}}", 100, 0, 5);
+    h1["QA_BGR_Event__pTmiss"] = new TH1F("QA_BGR_Event__pTmiss", ";p_{T,miss}", 100, 0, 5);
+
+    h2["QA_BGR_Track__nhits_type"] = new TH2F("QA_BGR_Track__nhits_type", ";N_{hit}", 20, 0, 20, 10, 0, 10);
+    h2["QA_BGR_Track__p_type"] = new TH2F("QA_BGR_Track__p_type", ";p (GeV)", pbins.size() - 1, &pbins[0], typebins.size() - 1, &typebins[0]);
+    h2["QA_BGR_Track__pT_type"] = new TH2F("QA_BGR_Track__pT_type", ";p_{T} (GeV)", pTbins.size() - 1, &pTbins[0], typebins.size() - 1, &typebins[0]);
+    h2["QA_BGR_Track__eta_type"] = new TH2F("QA_BGR_Track__eta_type", ";#eta", etabins.size() - 1, &etabins[0], typebins.size() - 1, &typebins[0]);
+
+    h2["QA_BGR_TrackCluster__dphi_type"] = new TH2F("QA_BGR_TrackCluster__dphi_type", ";#Delta#phi_{trk,cls}", dphibins.size() - 1, &dphibins[0], typebins.size() - 1, &typebins[0]);
+    h2["QA_BGR_TrackCluster__deta_type"] = new TH2F("QA_BGR_TrackCluster__deta_type", ";#Delta#eta_{trk,cls}", detabins.size() - 1, &detabins[0], typebins.size() - 1, &typebins[0]);
+    h2["QA_BGR_TrackCluster__dR_type"] = new TH2F("QA_BGR_TrackCluster__dR_type", ";#DeltaR_{trk,cls}", detabins.size() - 1, &detabins[0], typebins.size() - 1, &typebins[0]);
+    h2["QA_BGR_TrackCluster__Ep_type"] = new TH2F("QA_BGR_TrackCluster__Ep_type", ";E_{cls}/p_{trk}", ratbins_wide.size() - 1, &ratbins_wide[0], typebins.size() - 1, &typebins[0]);
+    h3["QA_BGR_TrackCluster__p_Ep_type"] = new TH3F("QA_BGR_TrackCluster__p_Ep_type", ";p_{trk} (GeV);E_{cls}/p_{trk}", pbins.size() - 1, &pbins[0], ratbins_wide.size() - 1, &ratbins_wide[0], typebins.size() - 1, &typebins[0]);
+
+    h2["QA_BGR_TrackNearCluster__dphi_type"] = new TH2F("QA_BGR_TrackNearCluster__dphi_type", ";#Delta#phi_{trk,cls}", dphibins.size() - 1, &dphibins[0], typebins.size() - 1, &typebins[0]);
+    h2["QA_BGR_TrackNearCluster__deta_type"] = new TH2F("QA_BGR_TrackNearCluster__deta_type", ";#Delta#eta_{trk,cls}", detabins.size() - 1, &detabins[0], typebins.size() - 1, &typebins[0]);
+    h2["QA_BGR_TrackNearCluster__dR_type"] = new TH2F("QA_BGR_TrackNearCluster__dR_type", ";#DeltaR_{trk,cls}", detabins.size() - 1, &detabins[0], typebins.size() - 1, &typebins[0]);
+    h2["QA_BGR_TrackNearCluster__Ep_type"] = new TH2F("QA_BGR_TrackNearCluster__Ep_type", ";E_{cls}/p_{trk}", ratbins_wide.size() - 1, &ratbins_wide[0], typebins.size() - 1, &typebins[0]);
+    h3["QA_BGR_TrackNearCluster__p_Ep_type"] = new TH3F("QA_BGR_TrackNearCluster__p_Ep_type", ";p_{trk} (GeV);E_{cls}/p_{trk}", pbins.size() - 1, &pbins[0], ratbins_wide.size() - 1, &ratbins_wide[0], typebins.size() - 1, &typebins[0]);
+
+    h2["QA_BGR_Vertex__vz_type"] = new TH2F("QA_BGR_Vertex__vz_type", ";Z_{vtx}", 100, -300, 300, 10, 0, 10);
+    h2["QA_BGR_Vertex__vx_type"] = new TH2F("QA_BGR_Vertex__vx_type", ";X_{vtx}", 100, -10, 10, 10, 0, 10);
+    h2["QA_BGR_Vertex__vy_type"] = new TH2F("QA_BGR_Vertex__vy_type", ";Y_{vtx}", 100, -10, 10, 10, 0, 10);
+    h2["QA_BGR_Vertex__vr_type"] = new TH2F("QA_BGR_Vertex__vr_type", ";R_{vtx}", 100, 0, 10, 10, 0, 10);
+
+    h2["QA_BGR_Cluster__E_type"] = new TH2F("QA_BGR_Cluster__E_type", ";E_{cls} (GeV)", pbins.size() - 1, &pbins[0], typebins.size() - 1, &typebins[0]);
+    h2["QA_BGR_Cluster__eta_type"] = new TH2F("QA_BGR_Cluster__eta_type", ";#eta_{cls}", etabins.size() - 1, &etabins[0], typebins.size() - 1, &typebins[0]);
+    h3["QA_BGR_Cluster__eta_E_type"] = new TH3F("QA_BGR_Cluster__eta_E_type", ";#eta_{cls};E_{cls} (GeV)", etabins.size() - 1, &etabins[0], pbins.size() - 1, &pbins[0], typebins.size() - 1, &typebins[0]);
+
+
+
+}
 
 // *****************************************************************************
 void reserve_match_EMC_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<string,TH3*>& h3)
@@ -253,6 +298,15 @@ void reserve_qa_histograms(map<string,TH1*>& h1, map<string,TH2*>& h2, map<strin
     h3["QA_sim_decay__etae_pT_charge"] = new TH3F("QA_sim_decay__etae_pT_charge", ";Generated #eta_{e};#eta", etabins.size() - 1, &etabins[0], pTbins.size() - 1, &pTbins[0], chargebins.size() - 1, &chargebins[0]);
     h3["QA_sim_decay__pTe_eta_charge"] = new TH3F("QA_sim_decay__pTe_eta_charge", ";Generated p_{T,e} (GeV);#eta", pTbins.size() - 1, &pTbins[0], etabins.size() - 1, &etabins[0], chargebins.size() - 1, &chargebins[0]);
     h3["QA_sim_decay__pTe_pT_charge"] = new TH3F("QA_sim_decay__pTe_pT_charge", ";Generated p_{T,e} (GeV);#eta", pTbins.size() - 1, &pTbins[0], pTbins.size() - 1, &pTbins[0], chargebins.size() - 1, &chargebins[0]);
+
+
+    h3["QA_rec_BT__eta_phi_type"] = new TH3F("QA_rec_BT__eta_phi_type", ";#eta;#phi", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], typebins.size() - 1, &typebins[0]);
+    h3["QA_rec_NT__eta_phi_type"] = new TH3F("QA_rec_NT__eta_phi_type", ";#eta;#phi", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], typebins.size() - 1, &typebins[0]);
+    h3["QA_rec_PT__eta_phi_type"] = new TH3F("QA_rec_PT__eta_phi_type", ";#eta;#phi", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], typebins.size() - 1, &typebins[0]);
+
+    h3["QA_rec_BC__eta_phi_type"] = new TH3F("QA_rec_BC__eta_phi_type", ";#eta;#phi", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], typebins.size() - 1, &typebins[0]);
+    h3["QA_rec_NC__eta_phi_type"] = new TH3F("QA_rec_NC__eta_phi_type", ";#eta;#phi", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], typebins.size() - 1, &typebins[0]);
+    h3["QA_rec_PC__eta_phi_type"] = new TH3F("QA_rec_PC__eta_phi_type", ";#eta;#phi", etabins.size() - 1, &etabins[0], phibins.size() - 1, &phibins[0], typebins.size() - 1, &typebins[0]);
 }
 
 

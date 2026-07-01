@@ -54,19 +54,18 @@ private:
     // IO
     string mInFileName;
     string mOutFileName;
+    string mTreeFileName;
+    bool mMakeTree;
     podio::ROOTReader* mReader;
     TFile* mOutFile;
+    TFile* mTreeFile;
+    TTree* mTree;
 
 public:
     // Event Instances
     podio::Frame frame;
     MyEvent* ev;
     unsigned int nev;
-
-    // Tracker ID
-    uint32_t collectionID_CKF;
-    uint32_t collectionID_TaggerM1;
-    uint32_t collectionID_TaggerM2;
 
     // Calorimeter ID
     uint32_t collectionID_BEMC;
@@ -89,6 +88,7 @@ public:
 public:
     MyAnalysis();
     MyAnalysis(string ifname, string ofname);
+    MyAnalysis(string ifname, string ofname, string treefname);
     ~MyAnalysis();
 
     bool Run();
@@ -96,6 +96,10 @@ private:
     bool Init();
     bool Next();
     bool End();
+
+    bool InitTree();
+    bool FillTree();
+    bool SaveTree();
 
     void TestingSpace();
 
@@ -106,20 +110,15 @@ private:
     bool ReadPODIO();
 
     // MyAnalysisReconstruction.cxx
-    bool TrackClusterMatching(); // EMC
-    bool TrackHCalClusterMatching(); // HCAL
-    bool CategorizeEvent(); // Truth-matched calculation
-    bool FindEventQuantities(); //Truth-matched calculation
+    bool Preselection();
+    bool ReconstructEventQuantities(); //Truth-matched calculation
 
     // MyAnalysisCollection.cxx
     void AnalyzeQA();
     void AnalyzeEfficiency();
     void AnalyzeResolution();
     void AnalyzeMatching();
-    void AnalyzeDecayVertex();
-
-    void AnalyzeElectronIdentification();
-
+    void AnalyzeBackground();
 };
 
 #endif

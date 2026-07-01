@@ -45,8 +45,6 @@
 namespace std {} using namespace std;
 
 namespace ROOT {
-   static TClass *MyCluster_Dictionary();
-   static void MyCluster_TClassManip(TClass*);
    static void *new_MyCluster(void *p = nullptr);
    static void *newArray_MyCluster(Long_t size, void *p);
    static void delete_MyCluster(void *p);
@@ -57,11 +55,11 @@ namespace ROOT {
    static TGenericClassInfo *GenerateInitInstanceLocal(const ::MyCluster*)
    {
       ::MyCluster *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyCluster));
+      static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::MyCluster >(nullptr);
       static ::ROOT::TGenericClassInfo 
-         instance("MyCluster", "MyEvent.h", 35,
+         instance("MyCluster", ::MyCluster::Class_Version(), "MyEvent.h", 30,
                   typeid(::MyCluster), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &MyCluster_Dictionary, isa_proxy, 4,
+                  &::MyCluster::Dictionary, isa_proxy, 4,
                   sizeof(::MyCluster) );
       instance.SetNew(&new_MyCluster);
       instance.SetNewArray(&newArray_MyCluster);
@@ -76,22 +74,9 @@ namespace ROOT {
    }
    // Static variable to force the class initialization
    static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::MyCluster*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *MyCluster_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::MyCluster*>(nullptr))->GetClass();
-      MyCluster_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void MyCluster_TClassManip(TClass* ){
-   }
-
 } // end of namespace ROOT
 
 namespace ROOT {
-   static TClass *MyGeneratedParticle_Dictionary();
-   static void MyGeneratedParticle_TClassManip(TClass*);
    static void *new_MyGeneratedParticle(void *p = nullptr);
    static void *newArray_MyGeneratedParticle(Long_t size, void *p);
    static void delete_MyGeneratedParticle(void *p);
@@ -102,11 +87,11 @@ namespace ROOT {
    static TGenericClassInfo *GenerateInitInstanceLocal(const ::MyGeneratedParticle*)
    {
       ::MyGeneratedParticle *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyGeneratedParticle));
+      static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::MyGeneratedParticle >(nullptr);
       static ::ROOT::TGenericClassInfo 
-         instance("MyGeneratedParticle", "MyEvent.h", 66,
+         instance("MyGeneratedParticle", ::MyGeneratedParticle::Class_Version(), "MyEvent.h", 83,
                   typeid(::MyGeneratedParticle), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &MyGeneratedParticle_Dictionary, isa_proxy, 4,
+                  &::MyGeneratedParticle::Dictionary, isa_proxy, 4,
                   sizeof(::MyGeneratedParticle) );
       instance.SetNew(&new_MyGeneratedParticle);
       instance.SetNewArray(&newArray_MyGeneratedParticle);
@@ -121,22 +106,9 @@ namespace ROOT {
    }
    // Static variable to force the class initialization
    static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::MyGeneratedParticle*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *MyGeneratedParticle_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::MyGeneratedParticle*>(nullptr))->GetClass();
-      MyGeneratedParticle_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void MyGeneratedParticle_TClassManip(TClass* ){
-   }
-
 } // end of namespace ROOT
 
 namespace ROOT {
-   static TClass *MyReconstructedParticle_Dictionary();
-   static void MyReconstructedParticle_TClassManip(TClass*);
    static void *new_MyReconstructedParticle(void *p = nullptr);
    static void *newArray_MyReconstructedParticle(Long_t size, void *p);
    static void delete_MyReconstructedParticle(void *p);
@@ -147,11 +119,11 @@ namespace ROOT {
    static TGenericClassInfo *GenerateInitInstanceLocal(const ::MyReconstructedParticle*)
    {
       ::MyReconstructedParticle *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyReconstructedParticle));
+      static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::MyReconstructedParticle >(nullptr);
       static ::ROOT::TGenericClassInfo 
-         instance("MyReconstructedParticle", "MyEvent.h", 95,
+         instance("MyReconstructedParticle", ::MyReconstructedParticle::Class_Version(), "MyEvent.h", 132,
                   typeid(::MyReconstructedParticle), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &MyReconstructedParticle_Dictionary, isa_proxy, 4,
+                  &::MyReconstructedParticle::Dictionary, isa_proxy, 4,
                   sizeof(::MyReconstructedParticle) );
       instance.SetNew(&new_MyReconstructedParticle);
       instance.SetNewArray(&newArray_MyReconstructedParticle);
@@ -166,67 +138,9 @@ namespace ROOT {
    }
    // Static variable to force the class initialization
    static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::MyReconstructedParticle*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *MyReconstructedParticle_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::MyReconstructedParticle*>(nullptr))->GetClass();
-      MyReconstructedParticle_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void MyReconstructedParticle_TClassManip(TClass* ){
-   }
-
 } // end of namespace ROOT
 
 namespace ROOT {
-   static TClass *MyParticle_Dictionary();
-   static void MyParticle_TClassManip(TClass*);
-   static void *new_MyParticle(void *p = nullptr);
-   static void *newArray_MyParticle(Long_t size, void *p);
-   static void delete_MyParticle(void *p);
-   static void deleteArray_MyParticle(void *p);
-   static void destruct_MyParticle(void *p);
-
-   // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const ::MyParticle*)
-   {
-      ::MyParticle *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyParticle));
-      static ::ROOT::TGenericClassInfo 
-         instance("MyParticle", "MyEvent.h", 165,
-                  typeid(::MyParticle), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &MyParticle_Dictionary, isa_proxy, 4,
-                  sizeof(::MyParticle) );
-      instance.SetNew(&new_MyParticle);
-      instance.SetNewArray(&newArray_MyParticle);
-      instance.SetDelete(&delete_MyParticle);
-      instance.SetDeleteArray(&deleteArray_MyParticle);
-      instance.SetDestructor(&destruct_MyParticle);
-      return &instance;
-   }
-   TGenericClassInfo *GenerateInitInstance(const ::MyParticle*)
-   {
-      return GenerateInitInstanceLocal(static_cast<::MyParticle*>(nullptr));
-   }
-   // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::MyParticle*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *MyParticle_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::MyParticle*>(nullptr))->GetClass();
-      MyParticle_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void MyParticle_TClassManip(TClass* ){
-   }
-
-} // end of namespace ROOT
-
-namespace ROOT {
-   static TClass *MyEvent_Dictionary();
-   static void MyEvent_TClassManip(TClass*);
    static void *new_MyEvent(void *p = nullptr);
    static void *newArray_MyEvent(Long_t size, void *p);
    static void delete_MyEvent(void *p);
@@ -237,11 +151,11 @@ namespace ROOT {
    static TGenericClassInfo *GenerateInitInstanceLocal(const ::MyEvent*)
    {
       ::MyEvent *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::MyEvent));
+      static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::MyEvent >(nullptr);
       static ::ROOT::TGenericClassInfo 
-         instance("MyEvent", "MyEvent.h", 261,
+         instance("MyEvent", ::MyEvent::Class_Version(), "MyEvent.h", 258,
                   typeid(::MyEvent), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &MyEvent_Dictionary, isa_proxy, 4,
+                  &::MyEvent::Dictionary, isa_proxy, 4,
                   sizeof(::MyEvent) );
       instance.SetNew(&new_MyEvent);
       instance.SetNewArray(&newArray_MyEvent);
@@ -256,17 +170,6 @@ namespace ROOT {
    }
    // Static variable to force the class initialization
    static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::MyEvent*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *MyEvent_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::MyEvent*>(nullptr))->GetClass();
-      MyEvent_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void MyEvent_TClassManip(TClass* ){
-   }
-
 } // end of namespace ROOT
 
 namespace ROOT {
@@ -359,6 +262,158 @@ namespace ROOT {
 
 } // end of namespace ROOT
 
+//______________________________________________________________________________
+atomic_TClass_ptr MyCluster::fgIsA(nullptr);  // static to hold class pointer
+
+//______________________________________________________________________________
+const char *MyCluster::Class_Name()
+{
+   return "MyCluster";
+}
+
+//______________________________________________________________________________
+const char *MyCluster::ImplFileName()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::MyCluster*)nullptr)->GetImplFileName();
+}
+
+//______________________________________________________________________________
+int MyCluster::ImplFileLine()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::MyCluster*)nullptr)->GetImplFileLine();
+}
+
+//______________________________________________________________________________
+TClass *MyCluster::Dictionary()
+{
+   fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::MyCluster*)nullptr)->GetClass();
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+TClass *MyCluster::Class()
+{
+   if (!fgIsA.load()) { R__LOCKGUARD(gInterpreterMutex); fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::MyCluster*)nullptr)->GetClass(); }
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+atomic_TClass_ptr MyGeneratedParticle::fgIsA(nullptr);  // static to hold class pointer
+
+//______________________________________________________________________________
+const char *MyGeneratedParticle::Class_Name()
+{
+   return "MyGeneratedParticle";
+}
+
+//______________________________________________________________________________
+const char *MyGeneratedParticle::ImplFileName()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::MyGeneratedParticle*)nullptr)->GetImplFileName();
+}
+
+//______________________________________________________________________________
+int MyGeneratedParticle::ImplFileLine()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::MyGeneratedParticle*)nullptr)->GetImplFileLine();
+}
+
+//______________________________________________________________________________
+TClass *MyGeneratedParticle::Dictionary()
+{
+   fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::MyGeneratedParticle*)nullptr)->GetClass();
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+TClass *MyGeneratedParticle::Class()
+{
+   if (!fgIsA.load()) { R__LOCKGUARD(gInterpreterMutex); fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::MyGeneratedParticle*)nullptr)->GetClass(); }
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+atomic_TClass_ptr MyReconstructedParticle::fgIsA(nullptr);  // static to hold class pointer
+
+//______________________________________________________________________________
+const char *MyReconstructedParticle::Class_Name()
+{
+   return "MyReconstructedParticle";
+}
+
+//______________________________________________________________________________
+const char *MyReconstructedParticle::ImplFileName()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::MyReconstructedParticle*)nullptr)->GetImplFileName();
+}
+
+//______________________________________________________________________________
+int MyReconstructedParticle::ImplFileLine()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::MyReconstructedParticle*)nullptr)->GetImplFileLine();
+}
+
+//______________________________________________________________________________
+TClass *MyReconstructedParticle::Dictionary()
+{
+   fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::MyReconstructedParticle*)nullptr)->GetClass();
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+TClass *MyReconstructedParticle::Class()
+{
+   if (!fgIsA.load()) { R__LOCKGUARD(gInterpreterMutex); fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::MyReconstructedParticle*)nullptr)->GetClass(); }
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+atomic_TClass_ptr MyEvent::fgIsA(nullptr);  // static to hold class pointer
+
+//______________________________________________________________________________
+const char *MyEvent::Class_Name()
+{
+   return "MyEvent";
+}
+
+//______________________________________________________________________________
+const char *MyEvent::ImplFileName()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::MyEvent*)nullptr)->GetImplFileName();
+}
+
+//______________________________________________________________________________
+int MyEvent::ImplFileLine()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::MyEvent*)nullptr)->GetImplFileLine();
+}
+
+//______________________________________________________________________________
+TClass *MyEvent::Dictionary()
+{
+   fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::MyEvent*)nullptr)->GetClass();
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+TClass *MyEvent::Class()
+{
+   if (!fgIsA.load()) { R__LOCKGUARD(gInterpreterMutex); fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::MyEvent*)nullptr)->GetClass(); }
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+void MyCluster::Streamer(TBuffer &R__b)
+{
+   // Stream an object of class MyCluster.
+
+   if (R__b.IsReading()) {
+      R__b.ReadClassBuffer(MyCluster::Class(),this);
+   } else {
+      R__b.WriteClassBuffer(MyCluster::Class(),this);
+   }
+}
+
 namespace ROOT {
    // Wrappers around operator new
    static void *new_MyCluster(void *p) {
@@ -379,6 +434,18 @@ namespace ROOT {
       (static_cast<current_t*>(p))->~current_t();
    }
 } // end of namespace ROOT for class ::MyCluster
+
+//______________________________________________________________________________
+void MyGeneratedParticle::Streamer(TBuffer &R__b)
+{
+   // Stream an object of class MyGeneratedParticle.
+
+   if (R__b.IsReading()) {
+      R__b.ReadClassBuffer(MyGeneratedParticle::Class(),this);
+   } else {
+      R__b.WriteClassBuffer(MyGeneratedParticle::Class(),this);
+   }
+}
 
 namespace ROOT {
    // Wrappers around operator new
@@ -401,6 +468,18 @@ namespace ROOT {
    }
 } // end of namespace ROOT for class ::MyGeneratedParticle
 
+//______________________________________________________________________________
+void MyReconstructedParticle::Streamer(TBuffer &R__b)
+{
+   // Stream an object of class MyReconstructedParticle.
+
+   if (R__b.IsReading()) {
+      R__b.ReadClassBuffer(MyReconstructedParticle::Class(),this);
+   } else {
+      R__b.WriteClassBuffer(MyReconstructedParticle::Class(),this);
+   }
+}
+
 namespace ROOT {
    // Wrappers around operator new
    static void *new_MyReconstructedParticle(void *p) {
@@ -422,26 +501,17 @@ namespace ROOT {
    }
 } // end of namespace ROOT for class ::MyReconstructedParticle
 
-namespace ROOT {
-   // Wrappers around operator new
-   static void *new_MyParticle(void *p) {
-      return  p ? new(p) ::MyParticle : new ::MyParticle;
+//______________________________________________________________________________
+void MyEvent::Streamer(TBuffer &R__b)
+{
+   // Stream an object of class MyEvent.
+
+   if (R__b.IsReading()) {
+      R__b.ReadClassBuffer(MyEvent::Class(),this);
+   } else {
+      R__b.WriteClassBuffer(MyEvent::Class(),this);
    }
-   static void *newArray_MyParticle(Long_t nElements, void *p) {
-      return p ? new(p) ::MyParticle[nElements] : new ::MyParticle[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_MyParticle(void *p) {
-      delete (static_cast<::MyParticle*>(p));
-   }
-   static void deleteArray_MyParticle(void *p) {
-      delete [] (static_cast<::MyParticle*>(p));
-   }
-   static void destruct_MyParticle(void *p) {
-      typedef ::MyParticle current_t;
-      (static_cast<current_t*>(p))->~current_t();
-   }
-} // end of namespace ROOT for class ::MyParticle
+}
 
 namespace ROOT {
    // Wrappers around operator new
@@ -507,71 +577,6 @@ namespace ROOT {
 } // end of namespace ROOT for class ::MyAnalysis
 
 namespace ROOT {
-   static TClass *vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR_Dictionary();
-   static void vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR_TClassManip(TClass*);
-   static void *new_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR(void *p = nullptr);
-   static void *newArray_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR(Long_t size, void *p);
-   static void delete_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR(void *p);
-   static void deleteArray_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR(void *p);
-   static void destruct_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR(void *p);
-
-   // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<vector<edm4eic::TrackPoint> >*)
-   {
-      vector<vector<edm4eic::TrackPoint> > *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<vector<edm4eic::TrackPoint> >));
-      static ::ROOT::TGenericClassInfo 
-         instance("vector<vector<edm4eic::TrackPoint> >", -2, "vector", 428,
-                  typeid(vector<vector<edm4eic::TrackPoint> >), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR_Dictionary, isa_proxy, 0,
-                  sizeof(vector<vector<edm4eic::TrackPoint> >) );
-      instance.SetNew(&new_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR);
-      instance.SetNewArray(&newArray_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR);
-      instance.SetDelete(&delete_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR);
-      instance.SetDeleteArray(&deleteArray_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR);
-      instance.SetDestructor(&destruct_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR);
-      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<vector<edm4eic::TrackPoint> > >()));
-
-      instance.AdoptAlternate(::ROOT::AddClassAlternate("vector<vector<edm4eic::TrackPoint> >","std::vector<std::vector<edm4eic::TrackPoint, std::allocator<edm4eic::TrackPoint> >, std::allocator<std::vector<edm4eic::TrackPoint, std::allocator<edm4eic::TrackPoint> > > >"));
-      return &instance;
-   }
-   // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const vector<vector<edm4eic::TrackPoint> >*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const vector<vector<edm4eic::TrackPoint> >*>(nullptr))->GetClass();
-      vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR_TClassManip(TClass* ){
-   }
-
-} // end of namespace ROOT
-
-namespace ROOT {
-   // Wrappers around operator new
-   static void *new_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR(void *p) {
-      return  p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<vector<edm4eic::TrackPoint> > : new vector<vector<edm4eic::TrackPoint> >;
-   }
-   static void *newArray_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR(Long_t nElements, void *p) {
-      return p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<vector<edm4eic::TrackPoint> >[nElements] : new vector<vector<edm4eic::TrackPoint> >[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR(void *p) {
-      delete (static_cast<vector<vector<edm4eic::TrackPoint> >*>(p));
-   }
-   static void deleteArray_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR(void *p) {
-      delete [] (static_cast<vector<vector<edm4eic::TrackPoint> >*>(p));
-   }
-   static void destruct_vectorlEvectorlEedm4eiccLcLTrackPointgRsPgR(void *p) {
-      typedef vector<vector<edm4eic::TrackPoint> > current_t;
-      (static_cast<current_t*>(p))->~current_t();
-   }
-} // end of namespace ROOT for class vector<vector<edm4eic::TrackPoint> >
-
-namespace ROOT {
    static TClass *vectorlEintgR_Dictionary();
    static void vectorlEintgR_TClassManip(TClass*);
    static void *new_vectorlEintgR(void *p = nullptr);
@@ -635,331 +640,6 @@ namespace ROOT {
       (static_cast<current_t*>(p))->~current_t();
    }
 } // end of namespace ROOT for class vector<int>
-
-namespace ROOT {
-   static TClass *vectorlEedm4hepcLcLMCParticlegR_Dictionary();
-   static void vectorlEedm4hepcLcLMCParticlegR_TClassManip(TClass*);
-   static void *new_vectorlEedm4hepcLcLMCParticlegR(void *p = nullptr);
-   static void *newArray_vectorlEedm4hepcLcLMCParticlegR(Long_t size, void *p);
-   static void delete_vectorlEedm4hepcLcLMCParticlegR(void *p);
-   static void deleteArray_vectorlEedm4hepcLcLMCParticlegR(void *p);
-   static void destruct_vectorlEedm4hepcLcLMCParticlegR(void *p);
-
-   // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<edm4hep::MCParticle>*)
-   {
-      vector<edm4hep::MCParticle> *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<edm4hep::MCParticle>));
-      static ::ROOT::TGenericClassInfo 
-         instance("vector<edm4hep::MCParticle>", -2, "vector", 428,
-                  typeid(vector<edm4hep::MCParticle>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &vectorlEedm4hepcLcLMCParticlegR_Dictionary, isa_proxy, 0,
-                  sizeof(vector<edm4hep::MCParticle>) );
-      instance.SetNew(&new_vectorlEedm4hepcLcLMCParticlegR);
-      instance.SetNewArray(&newArray_vectorlEedm4hepcLcLMCParticlegR);
-      instance.SetDelete(&delete_vectorlEedm4hepcLcLMCParticlegR);
-      instance.SetDeleteArray(&deleteArray_vectorlEedm4hepcLcLMCParticlegR);
-      instance.SetDestructor(&destruct_vectorlEedm4hepcLcLMCParticlegR);
-      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<edm4hep::MCParticle> >()));
-
-      instance.AdoptAlternate(::ROOT::AddClassAlternate("vector<edm4hep::MCParticle>","std::vector<edm4hep::MCParticle, std::allocator<edm4hep::MCParticle> >"));
-      return &instance;
-   }
-   // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const vector<edm4hep::MCParticle>*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *vectorlEedm4hepcLcLMCParticlegR_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const vector<edm4hep::MCParticle>*>(nullptr))->GetClass();
-      vectorlEedm4hepcLcLMCParticlegR_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void vectorlEedm4hepcLcLMCParticlegR_TClassManip(TClass* ){
-   }
-
-} // end of namespace ROOT
-
-namespace ROOT {
-   // Wrappers around operator new
-   static void *new_vectorlEedm4hepcLcLMCParticlegR(void *p) {
-      return  p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<edm4hep::MCParticle> : new vector<edm4hep::MCParticle>;
-   }
-   static void *newArray_vectorlEedm4hepcLcLMCParticlegR(Long_t nElements, void *p) {
-      return p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<edm4hep::MCParticle>[nElements] : new vector<edm4hep::MCParticle>[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_vectorlEedm4hepcLcLMCParticlegR(void *p) {
-      delete (static_cast<vector<edm4hep::MCParticle>*>(p));
-   }
-   static void deleteArray_vectorlEedm4hepcLcLMCParticlegR(void *p) {
-      delete [] (static_cast<vector<edm4hep::MCParticle>*>(p));
-   }
-   static void destruct_vectorlEedm4hepcLcLMCParticlegR(void *p) {
-      typedef vector<edm4hep::MCParticle> current_t;
-      (static_cast<current_t*>(p))->~current_t();
-   }
-} // end of namespace ROOT for class vector<edm4hep::MCParticle>
-
-namespace ROOT {
-   static TClass *vectorlEedm4eiccLcLTrackPointgR_Dictionary();
-   static void vectorlEedm4eiccLcLTrackPointgR_TClassManip(TClass*);
-   static void *new_vectorlEedm4eiccLcLTrackPointgR(void *p = nullptr);
-   static void *newArray_vectorlEedm4eiccLcLTrackPointgR(Long_t size, void *p);
-   static void delete_vectorlEedm4eiccLcLTrackPointgR(void *p);
-   static void deleteArray_vectorlEedm4eiccLcLTrackPointgR(void *p);
-   static void destruct_vectorlEedm4eiccLcLTrackPointgR(void *p);
-
-   // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<edm4eic::TrackPoint>*)
-   {
-      vector<edm4eic::TrackPoint> *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<edm4eic::TrackPoint>));
-      static ::ROOT::TGenericClassInfo 
-         instance("vector<edm4eic::TrackPoint>", -2, "vector", 428,
-                  typeid(vector<edm4eic::TrackPoint>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &vectorlEedm4eiccLcLTrackPointgR_Dictionary, isa_proxy, 0,
-                  sizeof(vector<edm4eic::TrackPoint>) );
-      instance.SetNew(&new_vectorlEedm4eiccLcLTrackPointgR);
-      instance.SetNewArray(&newArray_vectorlEedm4eiccLcLTrackPointgR);
-      instance.SetDelete(&delete_vectorlEedm4eiccLcLTrackPointgR);
-      instance.SetDeleteArray(&deleteArray_vectorlEedm4eiccLcLTrackPointgR);
-      instance.SetDestructor(&destruct_vectorlEedm4eiccLcLTrackPointgR);
-      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<edm4eic::TrackPoint> >()));
-
-      instance.AdoptAlternate(::ROOT::AddClassAlternate("vector<edm4eic::TrackPoint>","std::vector<edm4eic::TrackPoint, std::allocator<edm4eic::TrackPoint> >"));
-      return &instance;
-   }
-   // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const vector<edm4eic::TrackPoint>*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *vectorlEedm4eiccLcLTrackPointgR_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const vector<edm4eic::TrackPoint>*>(nullptr))->GetClass();
-      vectorlEedm4eiccLcLTrackPointgR_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void vectorlEedm4eiccLcLTrackPointgR_TClassManip(TClass* ){
-   }
-
-} // end of namespace ROOT
-
-namespace ROOT {
-   // Wrappers around operator new
-   static void *new_vectorlEedm4eiccLcLTrackPointgR(void *p) {
-      return  p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<edm4eic::TrackPoint> : new vector<edm4eic::TrackPoint>;
-   }
-   static void *newArray_vectorlEedm4eiccLcLTrackPointgR(Long_t nElements, void *p) {
-      return p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<edm4eic::TrackPoint>[nElements] : new vector<edm4eic::TrackPoint>[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_vectorlEedm4eiccLcLTrackPointgR(void *p) {
-      delete (static_cast<vector<edm4eic::TrackPoint>*>(p));
-   }
-   static void deleteArray_vectorlEedm4eiccLcLTrackPointgR(void *p) {
-      delete [] (static_cast<vector<edm4eic::TrackPoint>*>(p));
-   }
-   static void destruct_vectorlEedm4eiccLcLTrackPointgR(void *p) {
-      typedef vector<edm4eic::TrackPoint> current_t;
-      (static_cast<current_t*>(p))->~current_t();
-   }
-} // end of namespace ROOT for class vector<edm4eic::TrackPoint>
-
-namespace ROOT {
-   static TClass *vectorlEedm4eiccLcLTrackgR_Dictionary();
-   static void vectorlEedm4eiccLcLTrackgR_TClassManip(TClass*);
-   static void *new_vectorlEedm4eiccLcLTrackgR(void *p = nullptr);
-   static void *newArray_vectorlEedm4eiccLcLTrackgR(Long_t size, void *p);
-   static void delete_vectorlEedm4eiccLcLTrackgR(void *p);
-   static void deleteArray_vectorlEedm4eiccLcLTrackgR(void *p);
-   static void destruct_vectorlEedm4eiccLcLTrackgR(void *p);
-
-   // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<edm4eic::Track>*)
-   {
-      vector<edm4eic::Track> *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<edm4eic::Track>));
-      static ::ROOT::TGenericClassInfo 
-         instance("vector<edm4eic::Track>", -2, "vector", 428,
-                  typeid(vector<edm4eic::Track>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &vectorlEedm4eiccLcLTrackgR_Dictionary, isa_proxy, 0,
-                  sizeof(vector<edm4eic::Track>) );
-      instance.SetNew(&new_vectorlEedm4eiccLcLTrackgR);
-      instance.SetNewArray(&newArray_vectorlEedm4eiccLcLTrackgR);
-      instance.SetDelete(&delete_vectorlEedm4eiccLcLTrackgR);
-      instance.SetDeleteArray(&deleteArray_vectorlEedm4eiccLcLTrackgR);
-      instance.SetDestructor(&destruct_vectorlEedm4eiccLcLTrackgR);
-      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<edm4eic::Track> >()));
-
-      instance.AdoptAlternate(::ROOT::AddClassAlternate("vector<edm4eic::Track>","std::vector<edm4eic::Track, std::allocator<edm4eic::Track> >"));
-      return &instance;
-   }
-   // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const vector<edm4eic::Track>*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *vectorlEedm4eiccLcLTrackgR_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const vector<edm4eic::Track>*>(nullptr))->GetClass();
-      vectorlEedm4eiccLcLTrackgR_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void vectorlEedm4eiccLcLTrackgR_TClassManip(TClass* ){
-   }
-
-} // end of namespace ROOT
-
-namespace ROOT {
-   // Wrappers around operator new
-   static void *new_vectorlEedm4eiccLcLTrackgR(void *p) {
-      return  p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<edm4eic::Track> : new vector<edm4eic::Track>;
-   }
-   static void *newArray_vectorlEedm4eiccLcLTrackgR(Long_t nElements, void *p) {
-      return p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<edm4eic::Track>[nElements] : new vector<edm4eic::Track>[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_vectorlEedm4eiccLcLTrackgR(void *p) {
-      delete (static_cast<vector<edm4eic::Track>*>(p));
-   }
-   static void deleteArray_vectorlEedm4eiccLcLTrackgR(void *p) {
-      delete [] (static_cast<vector<edm4eic::Track>*>(p));
-   }
-   static void destruct_vectorlEedm4eiccLcLTrackgR(void *p) {
-      typedef vector<edm4eic::Track> current_t;
-      (static_cast<current_t*>(p))->~current_t();
-   }
-} // end of namespace ROOT for class vector<edm4eic::Track>
-
-namespace ROOT {
-   static TClass *vectorlEedm4eiccLcLReconstructedParticlegR_Dictionary();
-   static void vectorlEedm4eiccLcLReconstructedParticlegR_TClassManip(TClass*);
-   static void *new_vectorlEedm4eiccLcLReconstructedParticlegR(void *p = nullptr);
-   static void *newArray_vectorlEedm4eiccLcLReconstructedParticlegR(Long_t size, void *p);
-   static void delete_vectorlEedm4eiccLcLReconstructedParticlegR(void *p);
-   static void deleteArray_vectorlEedm4eiccLcLReconstructedParticlegR(void *p);
-   static void destruct_vectorlEedm4eiccLcLReconstructedParticlegR(void *p);
-
-   // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<edm4eic::ReconstructedParticle>*)
-   {
-      vector<edm4eic::ReconstructedParticle> *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<edm4eic::ReconstructedParticle>));
-      static ::ROOT::TGenericClassInfo 
-         instance("vector<edm4eic::ReconstructedParticle>", -2, "vector", 428,
-                  typeid(vector<edm4eic::ReconstructedParticle>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &vectorlEedm4eiccLcLReconstructedParticlegR_Dictionary, isa_proxy, 0,
-                  sizeof(vector<edm4eic::ReconstructedParticle>) );
-      instance.SetNew(&new_vectorlEedm4eiccLcLReconstructedParticlegR);
-      instance.SetNewArray(&newArray_vectorlEedm4eiccLcLReconstructedParticlegR);
-      instance.SetDelete(&delete_vectorlEedm4eiccLcLReconstructedParticlegR);
-      instance.SetDeleteArray(&deleteArray_vectorlEedm4eiccLcLReconstructedParticlegR);
-      instance.SetDestructor(&destruct_vectorlEedm4eiccLcLReconstructedParticlegR);
-      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<edm4eic::ReconstructedParticle> >()));
-
-      instance.AdoptAlternate(::ROOT::AddClassAlternate("vector<edm4eic::ReconstructedParticle>","std::vector<edm4eic::ReconstructedParticle, std::allocator<edm4eic::ReconstructedParticle> >"));
-      return &instance;
-   }
-   // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const vector<edm4eic::ReconstructedParticle>*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *vectorlEedm4eiccLcLReconstructedParticlegR_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const vector<edm4eic::ReconstructedParticle>*>(nullptr))->GetClass();
-      vectorlEedm4eiccLcLReconstructedParticlegR_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void vectorlEedm4eiccLcLReconstructedParticlegR_TClassManip(TClass* ){
-   }
-
-} // end of namespace ROOT
-
-namespace ROOT {
-   // Wrappers around operator new
-   static void *new_vectorlEedm4eiccLcLReconstructedParticlegR(void *p) {
-      return  p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<edm4eic::ReconstructedParticle> : new vector<edm4eic::ReconstructedParticle>;
-   }
-   static void *newArray_vectorlEedm4eiccLcLReconstructedParticlegR(Long_t nElements, void *p) {
-      return p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<edm4eic::ReconstructedParticle>[nElements] : new vector<edm4eic::ReconstructedParticle>[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_vectorlEedm4eiccLcLReconstructedParticlegR(void *p) {
-      delete (static_cast<vector<edm4eic::ReconstructedParticle>*>(p));
-   }
-   static void deleteArray_vectorlEedm4eiccLcLReconstructedParticlegR(void *p) {
-      delete [] (static_cast<vector<edm4eic::ReconstructedParticle>*>(p));
-   }
-   static void destruct_vectorlEedm4eiccLcLReconstructedParticlegR(void *p) {
-      typedef vector<edm4eic::ReconstructedParticle> current_t;
-      (static_cast<current_t*>(p))->~current_t();
-   }
-} // end of namespace ROOT for class vector<edm4eic::ReconstructedParticle>
-
-namespace ROOT {
-   static TClass *vectorlEedm4eiccLcLClustergR_Dictionary();
-   static void vectorlEedm4eiccLcLClustergR_TClassManip(TClass*);
-   static void *new_vectorlEedm4eiccLcLClustergR(void *p = nullptr);
-   static void *newArray_vectorlEedm4eiccLcLClustergR(Long_t size, void *p);
-   static void delete_vectorlEedm4eiccLcLClustergR(void *p);
-   static void deleteArray_vectorlEedm4eiccLcLClustergR(void *p);
-   static void destruct_vectorlEedm4eiccLcLClustergR(void *p);
-
-   // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<edm4eic::Cluster>*)
-   {
-      vector<edm4eic::Cluster> *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<edm4eic::Cluster>));
-      static ::ROOT::TGenericClassInfo 
-         instance("vector<edm4eic::Cluster>", -2, "vector", 428,
-                  typeid(vector<edm4eic::Cluster>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &vectorlEedm4eiccLcLClustergR_Dictionary, isa_proxy, 0,
-                  sizeof(vector<edm4eic::Cluster>) );
-      instance.SetNew(&new_vectorlEedm4eiccLcLClustergR);
-      instance.SetNewArray(&newArray_vectorlEedm4eiccLcLClustergR);
-      instance.SetDelete(&delete_vectorlEedm4eiccLcLClustergR);
-      instance.SetDeleteArray(&deleteArray_vectorlEedm4eiccLcLClustergR);
-      instance.SetDestructor(&destruct_vectorlEedm4eiccLcLClustergR);
-      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<edm4eic::Cluster> >()));
-
-      instance.AdoptAlternate(::ROOT::AddClassAlternate("vector<edm4eic::Cluster>","std::vector<edm4eic::Cluster, std::allocator<edm4eic::Cluster> >"));
-      return &instance;
-   }
-   // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const vector<edm4eic::Cluster>*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *vectorlEedm4eiccLcLClustergR_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const vector<edm4eic::Cluster>*>(nullptr))->GetClass();
-      vectorlEedm4eiccLcLClustergR_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void vectorlEedm4eiccLcLClustergR_TClassManip(TClass* ){
-   }
-
-} // end of namespace ROOT
-
-namespace ROOT {
-   // Wrappers around operator new
-   static void *new_vectorlEedm4eiccLcLClustergR(void *p) {
-      return  p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<edm4eic::Cluster> : new vector<edm4eic::Cluster>;
-   }
-   static void *newArray_vectorlEedm4eiccLcLClustergR(Long_t nElements, void *p) {
-      return p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<edm4eic::Cluster>[nElements] : new vector<edm4eic::Cluster>[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_vectorlEedm4eiccLcLClustergR(void *p) {
-      delete (static_cast<vector<edm4eic::Cluster>*>(p));
-   }
-   static void deleteArray_vectorlEedm4eiccLcLClustergR(void *p) {
-      delete [] (static_cast<vector<edm4eic::Cluster>*>(p));
-   }
-   static void destruct_vectorlEedm4eiccLcLClustergR(void *p) {
-      typedef vector<edm4eic::Cluster> current_t;
-      (static_cast<current_t*>(p))->~current_t();
-   }
-} // end of namespace ROOT for class vector<edm4eic::Cluster>
 
 namespace ROOT {
    static TClass *vectorlEMySelectionCriteriagR_Dictionary();
@@ -1090,71 +770,6 @@ namespace ROOT {
       (static_cast<current_t*>(p))->~current_t();
    }
 } // end of namespace ROOT for class vector<MyReconstructedParticle>
-
-namespace ROOT {
-   static TClass *vectorlEMyParticlegR_Dictionary();
-   static void vectorlEMyParticlegR_TClassManip(TClass*);
-   static void *new_vectorlEMyParticlegR(void *p = nullptr);
-   static void *newArray_vectorlEMyParticlegR(Long_t size, void *p);
-   static void delete_vectorlEMyParticlegR(void *p);
-   static void deleteArray_vectorlEMyParticlegR(void *p);
-   static void destruct_vectorlEMyParticlegR(void *p);
-
-   // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<MyParticle>*)
-   {
-      vector<MyParticle> *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<MyParticle>));
-      static ::ROOT::TGenericClassInfo 
-         instance("vector<MyParticle>", -2, "vector", 428,
-                  typeid(vector<MyParticle>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &vectorlEMyParticlegR_Dictionary, isa_proxy, 4,
-                  sizeof(vector<MyParticle>) );
-      instance.SetNew(&new_vectorlEMyParticlegR);
-      instance.SetNewArray(&newArray_vectorlEMyParticlegR);
-      instance.SetDelete(&delete_vectorlEMyParticlegR);
-      instance.SetDeleteArray(&deleteArray_vectorlEMyParticlegR);
-      instance.SetDestructor(&destruct_vectorlEMyParticlegR);
-      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<MyParticle> >()));
-
-      instance.AdoptAlternate(::ROOT::AddClassAlternate("vector<MyParticle>","std::vector<MyParticle, std::allocator<MyParticle> >"));
-      return &instance;
-   }
-   // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const vector<MyParticle>*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *vectorlEMyParticlegR_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const vector<MyParticle>*>(nullptr))->GetClass();
-      vectorlEMyParticlegR_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void vectorlEMyParticlegR_TClassManip(TClass* ){
-   }
-
-} // end of namespace ROOT
-
-namespace ROOT {
-   // Wrappers around operator new
-   static void *new_vectorlEMyParticlegR(void *p) {
-      return  p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<MyParticle> : new vector<MyParticle>;
-   }
-   static void *newArray_vectorlEMyParticlegR(Long_t nElements, void *p) {
-      return p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<MyParticle>[nElements] : new vector<MyParticle>[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_vectorlEMyParticlegR(void *p) {
-      delete (static_cast<vector<MyParticle>*>(p));
-   }
-   static void deleteArray_vectorlEMyParticlegR(void *p) {
-      delete [] (static_cast<vector<MyParticle>*>(p));
-   }
-   static void destruct_vectorlEMyParticlegR(void *p) {
-      typedef vector<MyParticle> current_t;
-      (static_cast<current_t*>(p))->~current_t();
-   }
-} // end of namespace ROOT for class vector<MyParticle>
 
 namespace ROOT {
    static TClass *vectorlEMyGeneratedParticlegR_Dictionary();
@@ -1350,6 +965,71 @@ namespace ROOT {
       (static_cast<current_t*>(p))->~current_t();
    }
 } // end of namespace ROOT for class vector<MyCluster>
+
+namespace ROOT {
+   static TClass *vectorlEMyClustermUgR_Dictionary();
+   static void vectorlEMyClustermUgR_TClassManip(TClass*);
+   static void *new_vectorlEMyClustermUgR(void *p = nullptr);
+   static void *newArray_vectorlEMyClustermUgR(Long_t size, void *p);
+   static void delete_vectorlEMyClustermUgR(void *p);
+   static void deleteArray_vectorlEMyClustermUgR(void *p);
+   static void destruct_vectorlEMyClustermUgR(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<MyCluster*>*)
+   {
+      vector<MyCluster*> *ptr = nullptr;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<MyCluster*>));
+      static ::ROOT::TGenericClassInfo 
+         instance("vector<MyCluster*>", -2, "vector", 428,
+                  typeid(vector<MyCluster*>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &vectorlEMyClustermUgR_Dictionary, isa_proxy, 0,
+                  sizeof(vector<MyCluster*>) );
+      instance.SetNew(&new_vectorlEMyClustermUgR);
+      instance.SetNewArray(&newArray_vectorlEMyClustermUgR);
+      instance.SetDelete(&delete_vectorlEMyClustermUgR);
+      instance.SetDeleteArray(&deleteArray_vectorlEMyClustermUgR);
+      instance.SetDestructor(&destruct_vectorlEMyClustermUgR);
+      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<MyCluster*> >()));
+
+      instance.AdoptAlternate(::ROOT::AddClassAlternate("vector<MyCluster*>","std::vector<MyCluster*, std::allocator<MyCluster*> >"));
+      return &instance;
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const vector<MyCluster*>*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *vectorlEMyClustermUgR_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const vector<MyCluster*>*>(nullptr))->GetClass();
+      vectorlEMyClustermUgR_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void vectorlEMyClustermUgR_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_vectorlEMyClustermUgR(void *p) {
+      return  p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<MyCluster*> : new vector<MyCluster*>;
+   }
+   static void *newArray_vectorlEMyClustermUgR(Long_t nElements, void *p) {
+      return p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<MyCluster*>[nElements] : new vector<MyCluster*>[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_vectorlEMyClustermUgR(void *p) {
+      delete (static_cast<vector<MyCluster*>*>(p));
+   }
+   static void deleteArray_vectorlEMyClustermUgR(void *p) {
+      delete [] (static_cast<vector<MyCluster*>*>(p));
+   }
+   static void destruct_vectorlEMyClustermUgR(void *p) {
+      typedef vector<MyCluster*> current_t;
+      (static_cast<current_t*>(p))->~current_t();
+   }
+} // end of namespace ROOT for class vector<MyCluster*>
 
 namespace ROOT {
    static TClass *maplEstringcOTH3mUgR_Dictionary();
@@ -1710,7 +1390,6 @@ extern int __Cling_AutoLoading_Map;
 class  __attribute__((annotate("$clingAutoload$MyEvent.h")))  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MyCluster;
 namespace std{template <typename _Tp> class  __attribute__((annotate("$clingAutoload$bits/allocator.h")))  __attribute__((annotate("$clingAutoload$string")))  allocator;
 }
-class  __attribute__((annotate("$clingAutoload$MyEvent.h")))  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MyParticle;
 class  __attribute__((annotate("$clingAutoload$MySelectionCriteria.h")))  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MySelectionCriteria;
 class  __attribute__((annotate("$clingAutoload$MyEvent.h")))  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MyReconstructedParticle;
 class  __attribute__((annotate("$clingAutoload$MyEvent.h")))  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MyGeneratedParticle;
@@ -1735,7 +1414,6 @@ class  __attribute__((annotate("$clingAutoload$MyAnalysis.h")))  MyAnalysis;
 "MyCluster", payloadCode, "@",
 "MyEvent", payloadCode, "@",
 "MyGeneratedParticle", payloadCode, "@",
-"MyParticle", payloadCode, "@",
 "MyReconstructedParticle", payloadCode, "@",
 "MySelectionCriteria", payloadCode, "@",
 nullptr

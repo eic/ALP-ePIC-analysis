@@ -27,16 +27,18 @@ using namespace std;
 
 
 
-
-
-
-
-
-class MyCluster
+class MyCluster : public TObject
 {
 public:
-    edm4eic::Cluster obj;
+    //edm4eic::Cluster obj;
+    int index;
+    unsigned int collectionID;
 
+    int type; // 0 = init/unIDed, 1 = MC signal, 2 = SR fake track (status == 2001), 3 = Brems, 4 = Touschek, 5 = Coulomb
+    bool isgood;
+
+    vector<int> isim;
+    vector<int> irec;
     bool is_ECal;
     bool is_HCal;
     bool is_b;
@@ -51,6 +53,14 @@ public:
     ~MyCluster(){Clear();}
     void Clear()
     {
+        index = -1;
+        collectionID = 0;
+
+        type = 0;
+        isgood = false;
+
+        isim.clear();
+        irec.clear();
         is_ECal = false;
         is_HCal = false;
         is_b = false;
@@ -60,49 +70,87 @@ public:
         ene = 0;
         pos = TVector3(0,0,0);
     }
+
+    bool operator==(const MyCluster& other) const
+    {
+        return (index == other.index) && (collectionID == other.collectionID);
+    }
+
+    ClassDef(MyCluster, 1);
 };
 
 
-class MyGeneratedParticle
+class MyGeneratedParticle : public TObject
 {
 public:
-    edm4hep::MCParticle obj;
+    //edm4hep::MCParticle obj;
+    int index;
+    unsigned int collectionID;
 
+    int type; // 0 = init/unIDed, 1 = MC signal, 2 = SR fake track (status == 2001), 3 = Brems, 4 = Touschek, 5 = Coulomb
     TVector3 p;
     float ene;
+    float charge;
     int pdg;
     TVector3 vtx;
 
     vector<int> irec;
     int status;
 
+    bool isgood;
 
 public:
     MyGeneratedParticle(){Clear();}
     ~MyGeneratedParticle(){Clear();}
     void Clear()
     {
+        index = -1;
+        collectionID = 0;
+
+        type = 0;
+
         p = TVector3(0,0,0);
         ene = 0;
+        charge = 0;
         pdg = 0;
         vtx = TVector3(0,0,0);
 
         irec.clear();
         status = 0;
+
+        isgood = false;
     }
+
+    bool operator==(const MyGeneratedParticle& other) const
+    {
+        return (index == other.index) && (collectionID == other.collectionID);
+    }
+
+    ClassDef(MyGeneratedParticle, 1);
 };
 
-class MyReconstructedParticle
+class MyReconstructedParticle : public TObject
 {
 public:
-    edm4eic::ReconstructedParticle obj;
+    //edm4eic::ReconstructedParticle obj;
+    int index;
+    unsigned int collectionID;
 
     TVector3 p;
     float ene;
+    float charge;
     int pdg;
-    TVector3 vtx;
-    TVector3 ref;// ReconstructedParticle::getReferencePoint() == Points to the MCParticle vertex position
-    TVector3 pos;// Track::getPosition() == Poionts to the position of track near the vertex
+    TVector3 vtx; // Track::getPosition() == Poionts to the position of track near the vertex
+    TVector3 ref; // ReconstructedParticle::getReferencePoint() == Points to the MCParticle vertex position
+    TVector3 pos_ECal; // Position at ECal surface
+    TVector3 pos_HCal; // Position at HCal surface
+    TVector3 pos_outer; // Position of the outermost tracking hit
+    int nhits;
+    float Enear_01;
+    float Enear_03;
+    float Enear_05;
+    float Enear_07;
+    float Enear_09;
 
     int type; // 0 = init/unIDed, 1 = MC signal, 2 = SR fake track (status == 2001), 3 = Brems, 4 = Touschek, 5 = Coulomb
 
@@ -110,18 +158,28 @@ public:
     bool is_track_b;
     bool is_track_n;
     bool is_track_p;
-    bool is_track_tagger;
+    bool is_track_t;
     bool is_cluster_b;
     bool is_cluster_n;
     bool is_cluster_p;
+    unsigned int bitmask;
 
-    int nhits;
+    vector<MyCluster*> clusters; // truth matched clusters
+    MyCluster* cluster; // highest energy ECAL cluster (truth matched)
+    MyCluster* cluster_near; // nearest EC cluster (not truth matched)
 
-    MyCluster* cluster; // highest energy ECAL cluster
-    vector<MyCluster> clusters;
-
+    vector<MyCluster*> clusters_HCal;
     MyCluster* cluster_HCal; // highest energy HCAL cluster
-    vector<MyCluster> clusters_HCal;
+
+    // selection
+    bool isgood;
+    bool isgood_momentum;
+    bool isgood_eta;
+    bool isgood_tracker;
+    bool isgood_Ep;
+    bool isgood_vtx;
+    bool isgood_pid;
+    bool isgood_nhits;
 
 
 public:
@@ -133,11 +191,22 @@ public:
 
     void Clear()
     {
+        index = -1;
+        collectionID = 0;
+
         p = TVector3(0,0,0);
         ene = 0;
+        charge = 0;
         pdg = 0;
         ref = TVector3(0,0,0);
-        pos = TVector3(0,0,0);
+        pos_ECal = TVector3(0,0,0);
+        pos_HCal = TVector3(0,0,0);
+        pos_outer = TVector3(0,0,0);
+        Enear_01 = 0;
+        Enear_03 = 0;
+        Enear_05 = 0;
+        Enear_07 = 0;
+        Enear_09 = 0;
 
         type = 0;
 
@@ -145,138 +214,62 @@ public:
         is_track_b = false;
         is_track_n = false;
         is_track_p = false;
-        is_track_tagger = false;
+        is_track_t = false;
         is_cluster_b = false;
         is_cluster_n = false;
         is_cluster_p = false;
+        bitmask = 0;
 
         nhits = 0;
 
         cluster = nullptr;
+        cluster_near = nullptr;
         clusters.clear();
 
         cluster_HCal = nullptr;
         clusters_HCal.clear();
+
+        isgood = false;
+        isgood_momentum = false;
+        isgood_eta = false;
+        isgood_tracker = false;
+        isgood_Ep = false;
+        isgood_vtx = false;
+        isgood_pid = false;
+        isgood_nhits = false;
+
     }
-};
 
-
-// Old
-class MyParticle
-{
-public:
-    edm4hep::MCParticle sim;
-    edm4eic::ReconstructedParticle rec;
-
-    int bitmask; // includes all track hits
-    int bitmask2; // includes only the last hit of tracker and high-ET cluster
-    bool is_track_endcap_n;
-    bool is_track_endcap_p;
-    bool is_track_barrel;
-    bool is_track_tagger;
-    bool is_cluster_endcap_n;
-    bool is_cluster_endcap_p;
-    bool is_cluster_barrel;
-
-    vector<edm4eic::Track> tracks;
-    vector<vector<edm4eic::TrackPoint>> points; // for projection
-    vector<edm4eic::Track> tracks_tagger;
-
-    // Track
-    edm4eic::Track track; // CentralCKFTracks
-    vector<edm4eic::TrackPoint> projection; // Projection for CentralCKFTracks
-    int nhits;
-
-
-    // EMC
-    vector<edm4eic::Cluster> clusters;
-    edm4eic::Cluster cluster_high;
-    edm4eic::Cluster cluster_near;
-    TVector3 pos_cluster_sum;
-    float ene_cluster_sum;
-    TVector3 pos_track;
-
-    // HCal
-    vector<edm4eic::Cluster> hclusters;
-    edm4eic::Cluster hcluster_high;
-    edm4eic::Cluster hcluster_near;
-    TVector3 pos_hcluster_sum;
-    float ene_hcluster_sum;
-    TVector3 pos_track_hcal;
-
-
-    MyParticle()
+    void GenerateBitmask()
     {
-        Clear();
+
     }
 
-    ~MyParticle()
+    bool operator==(const MyReconstructedParticle& other) const
     {
-        Clear();
+        return (index == other.index) && (collectionID == other.collectionID);
     }
 
-    void Clear()
-    {
-        sim = edm4hep::MCParticle();
-        rec = edm4eic::ReconstructedParticle();
-
-        bitmask = 0;
-        bitmask2 = 0;
-
-        is_track_endcap_n = false;
-        is_track_endcap_p = false;
-        is_track_barrel = false;
-        is_track_tagger = false;
-
-        is_cluster_endcap_n = false;
-        is_cluster_endcap_p = false;
-        is_cluster_barrel = false;
-
-        tracks.clear();
-        points.clear();
-        tracks_tagger.clear();
-
-        track = edm4eic::Track();
-        projection.clear();
-        nhits = 0;
-
-        clusters.clear();
-        cluster_high = edm4eic::Cluster();
-        cluster_near = edm4eic::Cluster();
-        pos_cluster_sum = TVector3(0,0,0);
-        ene_cluster_sum = 0;
-        pos_track = TVector3(0,0,0);
-
-        hclusters.clear();
-        hcluster_high = edm4eic::Cluster();
-        hcluster_near = edm4eic::Cluster();
-        pos_hcluster_sum = TVector3(0,0,0);
-        ene_hcluster_sum = 0;
-        pos_track_hcal = TVector3(0,0,0);
-    }
+    ClassDef(MyReconstructedParticle, 1);
 };
 
 
 
-class MyEvent
+class MyEvent : public TObject
 {
 public:
     // New
+    int id;
     map<int, MyGeneratedParticle> sim;
     map<int, MyReconstructedParticle> rec;
+    vector<MyCluster> clusters;
+    vector<MyCluster> clusters_HCal;
 
-    // Old
-    int id;
-
-    int nmatches; // cluster-track matching (EMC)
-    int nmatches_hcal; // cluster-track matching (HCal)
-
-    vector<MyParticle> particles; // particles with sim-rec association
-    vector<edm4hep::MCParticle> particles_sim; // all simulated particle
-    vector<edm4eic::ReconstructedParticle> particles_rec; // all reconstructed charged particle
-    vector<edm4eic::Cluster> clusters; // all EMC clusters
-    vector<edm4eic::Cluster> hclusters; // all HCal clusters
-
+    MyGeneratedParticle* eletrue;
+    MyReconstructedParticle* ele;
+    MyReconstructedParticle* ecand;
+    MyGeneratedParticle* beam;
+    MyGeneratedParticle* alp;
 
     TVector3 pele;//rec
     TVector3 peletrue;
@@ -285,10 +278,21 @@ public:
     TVector3 palp;//true
 
     float q2;
+    float x;
+    float y;
     TVector3 pmiss;
     float q2true;
+    float xtrue;
+    float ytrue;
     TVector3 pmisstrue;
 
+    int multiplicity;
+    float empz;
+    float pTsqrtET;
+
+    float dphi_e_near;
+    float dR_e_near;
+    float dphi_e_pmiss;
 
     MyEvent()
     {
@@ -306,13 +310,14 @@ public:
         rec.clear();
 
         id = -1;
-        nmatches = 0;
-        nmatches_hcal = 0;
-        particles_sim.clear();
-        particles_rec.clear();
-        particles.clear();
         clusters.clear();
-        hclusters.clear();
+        clusters_HCal.clear();
+
+        eletrue = nullptr;
+        ele = nullptr;
+        ecand = nullptr;
+        beam = nullptr;
+        alp = nullptr;
 
         pele = TVector3(0,0,0);
         peletrue = TVector3(0,0,0);
@@ -321,139 +326,24 @@ public:
         palp = TVector3(0,0,0);
 
         q2 = 0;
+        x = 0;
+        y = 0;
         pmiss = TVector3(0,0,0);
         q2true = 0;
+        xtrue = 0;
+        ytrue = 0;
         pmisstrue = TVector3(0,0,0);
+        multiplicity = 0;
+        empz = 0;
+        pTsqrtET = 0;
+
+        dphi_e_near = -1;
+        dR_e_near = -1;
+        dphi_e_pmiss = -1;
     }
 
-    edm4eic::ReconstructedParticle GetFinalLepton()
-    {
-        for (auto par : particles) if (par.sim.getPDG() == 11 && par.sim.getGeneratorStatus() == 1) return par.rec;
-        return edm4eic::ReconstructedParticle::makeEmpty();
-    }
-
-    edm4hep::MCParticle GetFinalLeptonTrue()
-    {
-        for (auto par : particles_sim) if (par.getPDG() == 11 && par.getGeneratorStatus() == 1) return par;
-        return edm4hep::MCParticle::makeEmpty();
-    }
-
-    edm4hep::MCParticle GetInitialLeptonTrue()
-    {
-        for (auto par : particles_sim) if (par.getPDG() == 11 && par.getGeneratorStatus() == 4) return par;
-        return edm4hep::MCParticle::makeEmpty();
-    }
-
-    edm4hep::MCParticle GetALPTrue()
-    {
-        for (auto par : particles_sim) if (par.getPDG() == 0 && (par.getGeneratorStatus() == 1 || par.getGeneratorStatus() == 2)) return par;
-        return edm4hep::MCParticle::makeEmpty();
-    }
-
-
-
-    void Print();
+    ClassDef(MyEvent, 1);
 };
 
-
-
-
-
-
-
-
-
-inline void MyEvent::Print()
-{
-    int ww = 15;
-    cout << "*******************************************************************" << endl;
-    cout << "Event " << id << " Information" << endl;
-    cout << " - Event Parameters:" << endl;
-    cout << "type" << setw(ww) << "Q2" << setw(ww) << "pmiss" << setw(ww) << "pzmiss" << setw(ww) << "pTmiss" << setw(ww) << "eta_miss" << setw(ww) << "phi_miss" << endl;
-    cout << "sim" << setw(ww) << q2true << setw(ww) << pmisstrue.Mag() << setw(ww) << pmisstrue.Pz() << setw(ww) << pmisstrue.Pt() << setw(ww) << pmisstrue.Eta() << setw(ww) << pmisstrue.Phi() << endl;
-    cout << "rec" << setw(ww) << q2 << setw(ww) << pmiss.Mag() << setw(ww) << pmiss.Pz() << setw(ww) << pmiss.Pt() << setw(ww) << pmiss.Eta() << setw(ww) << pmiss.Phi() << endl;
-
-    /*
-    cout << " - MCParticle List:" << endl;
-    for (unsigned int i = 0; i < particles_sim.size(); ++i)
-    {
-        auto par = particles_sim[i];
-        TVector3 p(par.getMomentum().x, par.getMomentum().y, par.getMomentum().z);
-        int mother1 = par.parents_size() > 0 ? par.getParents()[0].getObjectID().index : -9999;
-        int mother2 = par.parents_size() > 1 ? par.getParents()[1].getObjectID().index : -9999;
-        if (i == 0) cout << setw(ww) << "i" << setw(ww) << "stat" << setw(ww) << "mother1" << setw(ww) << "mother2" << setw(ww) << "pdg" << setw(ww) << "p" << setw(ww) << "pz" << setw(ww) << "pt" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
-        cout << setw(ww) << i << setw(ww) << par.getGeneratorStatus() << setw(ww) << mother1 << setw(ww) << mother2 << setw(ww) << par.getPDG() << setw(ww) << p.Mag() << setw(ww) << p.Pz() << setw(ww) << p.Pt() << setw(ww) << p.Eta() << setw(ww) << p.Phi() << endl;
-    }
-    */
-
-    cout << " - MCParticle List (short):" << endl;
-    for (unsigned int i = 0; i < particles_sim.size(); ++i)
-    {
-        auto par = particles_sim[i];
-        TVector3 p(par.getMomentum().x, par.getMomentum().y, par.getMomentum().z);
-        int mother1 = par.parents_size() > 0 ? par.getParents()[0].getObjectID().index : -9999;
-        int mother2 = par.parents_size() > 1 ? par.getParents()[1].getObjectID().index : -9999;
-        if (i == 0) cout << setw(ww) << "i" << setw(ww) << "stat" << setw(ww) << "mother1" << setw(ww) << "mother2" << setw(ww) << "pdg" << setw(ww) << "p" << setw(ww) << "pz" << setw(ww) << "pt" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
-        if (par.getGeneratorStatus() != 1 && par.getGeneratorStatus() != 3001 && par.getGeneratorStatus() != 4001 && par.getGeneratorStatus() != 5001 && par.getGeneratorStatus() != 6001) continue;
-        // Process     Description                                         Sampling Frequency (kHz)    Status Code Shift
-        // signal      DIS NC 18x275 Q2>1                                  500                         0
-        // synrad      Synchrotron Radiation                               14000	                   2000
-        // ebrems      Electron bremsstrahlung radiation                   316.94	                   3000
-        // etouschek   Electron Touschek scattering (intrabeam scattering) 1.3                         4000
-        // ecoulomb    Electron Coulomb scattering processes               0.72                        5000
-        // p.b.gas     Proton beam gas interactions                        22.5                        6000
-        cout << setw(ww) << i << setw(ww) << par.getGeneratorStatus() << setw(ww) << mother1 << setw(ww) << mother2 << setw(ww) << par.getPDG() << setw(ww) << p.Mag() << setw(ww) << p.Pz() << setw(ww) << p.Pt() << setw(ww) << p.Eta() << setw(ww) << p.Phi() << endl;
-    }
-
-
-
-    if (particles_rec.size() > 0) cout << " - ReconstructedChargedParticle List:" << endl;
-    for (unsigned int i = 0; i < particles_rec.size(); ++i)
-    {
-        auto par = particles_rec[i];
-        TVector3 p(par.getMomentum().x, par.getMomentum().y, par.getMomentum().z);
-        if (i == 0) cout << setw(ww) << "i" << setw(ww) << "pdg" << setw(ww) << "p" << setw(ww) << "pz" << setw(ww) << "pt" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
-        cout << setw(ww) << i << setw(ww) << par.getPDG() << setw(ww) << p.Mag() << setw(ww) << p.Pz() << setw(ww) << p.Pt() << setw(ww) << p.Eta() << setw(ww) << p.Phi() << endl;
-    }
-
-
-    cout << " - Gen-Rec Associations:" << endl;
-    for (unsigned int i = 0; i < particles.size(); ++i)
-    {
-        auto sim = particles[i].sim;
-        auto rec = particles[i].rec;
-        TVector3 ps(sim.getMomentum().x, sim.getMomentum().y, sim.getMomentum().z);
-        TVector3 pr(rec.getMomentum().x, rec.getMomentum().y, rec.getMomentum().z);
-
-        if (i == 0) cout << setw(ww) << "i" << setw(ww) << "type" << setw(ww) << "pdg" << setw(ww) << "p" << setw(ww) << "pz" << setw(ww) << "pT" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
-        cout << setw(ww) << i << setw(ww) << "Gen" << setw(ww) << sim.getPDG() << setw(ww) << ps.Mag() << setw(ww) << ps.Pz() << setw(ww) << ps.Pt() << setw(ww) << ps.Eta() << setw(ww) << ps.Phi() << endl;
-        cout << setw(ww) << i << setw(ww) << "Rec" << setw(ww) << "" << setw(ww) << pr.Mag() << setw(ww) << pr.Pz() << setw(ww) << pr.Pt() << setw(ww) << pr.Eta() << setw(ww) << pr.Phi() << endl;
-    }
-
-
-    if (clusters.size() > 0) cout << " - EMC Cluster List:" << endl;
-    for (unsigned int i = 0; i < clusters.size(); ++i)
-    {
-        auto c = clusters[i];
-        string type = "";
-        TVector3 pos(c.getPosition().x, c.getPosition().y, c.getPosition().z);
-        if (i == 0) cout << setw(ww) << "i" << setw(ww) << "type" << setw(ww) << "index" << setw(ww) << "energy" << setw(ww) << "radius" << setw(ww) << "z" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
-        cout << setw(ww) << i << setw(ww) << type << setw(ww) << c.getObjectID().index << setw(ww) << c.getEnergy() << setw(ww) << pos.Perp() << setw(ww) << pos.Z() << setw(ww) << pos.Eta() << setw(ww) << pos.Phi() << endl;
-    }
-
-    if (hclusters.size() > 0) cout << " - HCal Cluster List:" << endl;
-    for (unsigned int i = 0; i < hclusters.size(); ++i)
-    {
-        auto c = hclusters[i];
-        string type = "";
-        TVector3 pos(c.getPosition().x, c.getPosition().y, c.getPosition().z);
-        if (i == 0) cout << setw(ww) << "i" << setw(ww) << "type" << setw(ww) << "index" << setw(ww) << "energy" << setw(ww) << "radius" << setw(ww) << "z" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
-        cout << setw(ww) << i << setw(ww) << type << setw(ww) << c.getObjectID().index << setw(ww) << c.getEnergy() << setw(ww) << pos.Perp() << setw(ww) << pos.Z() << setw(ww) << pos.Eta() << setw(ww) << pos.Phi() << endl;
-    }
-
-
-    cout << "*******************************************************************" << endl;
-    cout << endl;
-}
 
 #endif

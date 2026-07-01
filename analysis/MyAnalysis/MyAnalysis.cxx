@@ -1,3 +1,5 @@
+#include <type_traits>
+
 #include "TTree.h"
 #include "TString.h"
 #include "TClonesArray.h"
@@ -15,6 +17,9 @@
 
 #include "MyAnalysis.h"
 
+template <typename T>
+void print_vector(const vector<T>& vec, int ww = 15);
+
 // *****************************************************************************
 MyAnalysis::MyAnalysis()
 {
@@ -25,6 +30,17 @@ MyAnalysis::MyAnalysis(string ifname, string ofname)
 {
     mInFileName = ifname;
     mOutFileName = ofname;
+    mMakeTree = false;
+
+    cuts.LoadDefault();
+}
+
+MyAnalysis::MyAnalysis(string ifname, string ofname, string treefname)
+{
+    mInFileName = ifname;
+    mOutFileName = ofname;
+    mTreeFileName = treefname;
+    mMakeTree = true;
 
     cuts.LoadDefault();
 }
@@ -35,24 +51,34 @@ MyAnalysis::~MyAnalysis()
     delete mReader;
     delete mOutFile;
     delete ev;
+    if (mMakeTree)
+    {
+        delete mTreeFile;
+        delete mTree;
+    }
 }
 
 // *****************************************************************************
 bool MyAnalysis::Run()
 {
     Init();
+    if (mMakeTree) InitTree();
     while (Next())
     {
         if (nev % 100 == 0) cout << nev << " events processed..." << endl;
         //if (ev->particles_rec.size() > 0) ev->Print();
         //if (ev->particles.size() > 0) ev->Print();
         //if (ev->nmatches > 0) ev->Print();
+
+        if (mMakeTree) FillTree();
         nev++;
     }
+    if (mMakeTree) SaveTree();
     End();
 
     return true;
 }
+
 
 // *****************************************************************************
 bool MyAnalysis::Init()
@@ -66,17 +92,6 @@ bool MyAnalysis::Init()
 
     nev = 0;
     ev = new MyEvent();
-
-    collectionID_CKF = 0;
-    collectionID_TaggerM1 = 0;
-    collectionID_TaggerM2 = 0;
-
-    collectionID_BEMC = 0;
-    collectionID_NEMC = 0;
-    collectionID_PEMC = 0;
-    collectionID_BHCal = 0;
-    collectionID_NHCal = 0;
-    collectionID_PHCal = 0;
 
     return true;
 }
@@ -99,12 +114,8 @@ bool MyAnalysis::Next()
     frame = podio::Frame(mReader->readNextEntry(podio::Category::Event));
 
     ReadPODIO();
-
-    TrackClusterMatching();
-    TrackHCalClusterMatching();
-    FindEventQuantities();
-    CategorizeEvent();
-
+    Preselection();
+    ReconstructEventQuantities();
 
     // Your Analysis begins here
     TestingSpace();
@@ -112,10 +123,7 @@ bool MyAnalysis::Next()
     AnalyzeEfficiency();
     AnalyzeResolution();
     AnalyzeMatching();
-    AnalyzeDecayVertex();
-
-    AnalyzeElectronIdentification();
-    // Your Analysis ends here
+    AnalyzeBackground();
 
     return true;
 }
@@ -123,101 +131,86 @@ bool MyAnalysis::Next()
 // *****************************************************************************
 void MyAnalysis::TestingSpace()
 {
+    if (ev->multiplicity == 0) return;
+
     int ww = 15;
     int i = 0;
 
-    cout << endl; i = 0;
-    for (auto itr = ev->sim.begin(); itr != ev->sim.end(); ++itr)
+    cout << endl;
+    cout << "Event:" << endl;
+    print_vector<string>({"id", "istrue", "Q2", "x", "y", "pe", "pZe", "pTe", "etae", "phie"}, ww);
+    print_vector<float>({ev->id, 1, ev->q2true, ev->xtrue, ev->ytrue, ev->peletrue.Mag(), ev->peletrue.Pz(), ev->peletrue.Pt(), ev->peletrue.Eta(), ev->peletrue.Phi()}, ww);
+    print_vector<float>({ev->id, 0, ev->q2, ev->x, ev->y, ev->pele.Mag(), ev->pele.Pz(), ev->pele.Pt(), ev->pele.Eta(), ev->pele.Phi()}, ww);
+
+    cout << endl;
+    print_vector<string>({"multiplicity", "empz", "pTsET", "dphi_e_near", "dR_e_near", "dphi_e_pmiss"}, ww);
+    print_vector<float>({ev->multiplicity, ev->empz, ev->pTsqrtET, ev->dphi_e_near, ev->dR_e_near, ev->dphi_e_pmiss}, ww);
+
+
+    cout << endl;
+    cout << "Gen:" << endl;
+    i = 0;
+    for (auto& [key, sim] : ev->sim)
     {
-        auto& par = itr->second;
-        if (par.status != 1 && par.status != 3001 && par.status != 4001 && par.status != 5001 && par.status != 6001) continue;
-        if (i == 0) cout << setw(ww) << "i" << setw(ww) << "status" << setw(ww) << "pdg" << setw(ww) << "p" << setw(ww) << "pz" << setw(ww) << "pT" << setw(ww) << "eta" << setw(ww) << "phi" << setw(ww) << "vx" << setw(ww) << "vy" << setw(ww) << "vz" << endl;
-        cout << setw(ww) << i << setw(ww) << par.status << setw(ww) << par.pdg << setw(ww) << par.p.Mag() << setw(ww) << par.p.Pz() << setw(ww) << par.p.Pt() << setw(ww) << par.p.Eta() << setw(ww) << par.p.Phi() << setw(ww) << par.vtx.X() << setw(ww) << par.vtx.Y() << setw(ww) << par.vtx.Z() << endl;
+        if (sim.status % 1000 != 1 || int(sim.status / 1000) == 2) continue;
+        if (i == 0) print_vector<string>({"i", "stat", "pdg", "ene", "p", "pz", "pT", "eta", "phi"}, ww);
+        print_vector<float>({i, sim.status, sim.pdg, sim.ene, sim.p.Mag(), sim.p.Z(), sim.p.Pt(), sim.p.Eta(), sim.p.Phi()}, ww);
         i++;
     }
-    cout << endl; i = 0;
 
-    for (auto itr = ev->rec.begin(); itr != ev->rec.end(); ++itr)
+    cout << endl;
+    cout << "Rec:" << endl;
+    i = 0;
+    for (auto& [key, rec] : ev->rec)
     {
-        auto& par = itr->second;
-        if (i == 0) cout << setw(ww) << "i" << setw(ww) << "Ntrue" << setw(ww) << "pdg" << setw(ww) << "p" << setw(ww) << "pz" << setw(ww) << "pT" << setw(ww) << "eta" << setw(ww) << "phi" << setw(ww) << "refx" << setw(ww) << "refy" << setw(ww) << "refz" << setw(ww) << "posx" << setw(ww) << "posy" << setw(ww) << "posz" << endl;
-        cout << setw(ww) << i << setw(ww) << par.isim.size() << setw(ww) << par.pdg << setw(ww) << par.p.Mag() << setw(ww) << par.p.Pz() << setw(ww) << par.p.Pt() << setw(ww) << par.p.Eta() << setw(ww) << par.p.Phi() << setw(ww) << par.ref.X() << setw(ww) << par.ref.Y() << setw(ww) << par.ref.Z() << setw(ww) << par.pos.X() << setw(ww) << par.pos.Y() << setw(ww) << par.pos.Z() << endl;
-        //cout << setw(ww) << i << setw(ww) << par.sim.size() << setw(ww) << par.pdg << setw(ww) << par.p.Mag() << setw(ww) << par.p.Pz() << setw(ww) << par.p.Pt() << setw(ww) << par.p.Eta() << setw(ww) << par.p.Phi() << endl;
+        auto& sim = ev->sim[rec.isim[0]];
+        if (i == 0) print_vector<string>({"i", "type", "is_track_b", "is_track_n", "is_track_p", "is_track_t", "pdg", "ene", "p", "pz", "pT", "eta", "phi", "Enear1", "Enear3", "Enear5", "Enear7", "Enear9"}, ww);
+        print_vector<float>({i, rec.type, rec.is_track_b, rec.is_track_n, rec.is_track_p, rec.is_track_t, sim.pdg, rec.ene, rec.p.Mag(), rec.p.Z(), rec.p.Pt(), rec.p.Eta(), rec.p.Phi(), rec.Enear_01, rec.Enear_03, rec.Enear_05, rec.Enear_07, rec.Enear_09}, ww);
         i++;
     }
-    cout << endl; i = 0;
-    cout << endl; i = 0;
+
+    cout << endl;
+    cout << "Cluster:" << endl;
+    i = 0;
+    for (auto& c : ev->clusters)
+    {
+        auto& sim = ev->sim[c.isim[0]];
+        if (i == 0) print_vector<string>({"i", "type", "pdg", "ene", "eta", "phi"}, ww);
+        print_vector<float>({i, c.type, sim.pdg, c.ene, c.pos.Eta(), c.pos.Phi(), c.collectionID, c.index, sim.collectionID, sim.index}, ww);
+        i++;
+    }
 
 
+
+    cout << endl;
+
+    /*
+    pele = TVector3(0,0,0);
+    peletrue = TVector3(0,0,0);
+    pbeam = TVector3(0,0,0);
+    pion = TVector3(0,0,0);
+    palp = TVector3(0,0,0);
+
+    q2 = 0;
+    pmiss = TVector3(0,0,0);
+    q2true = 0;
+    pmisstrue = TVector3(0,0,0);
+    multiplicity = 0;
+    empz = 0;
+    pTsqrtET = 0;
+
+    dphi_e_near = -1;
+    dR_e_near = -1;
+    dphi_e_pmiss = -1;
+    */
     return;
+}
 
-    // Event classification: LowQ2, EndcapN, Barrel, EndcapP
-    bool dothis = false;
-    for (auto& par : ev->particles) if (par.is_track_tagger) {dothis = true; break;}
 
-    if (dothis)
-    {
-        for (unsigned int i = 0; i < ev->particles.size(); ++i)
-        {
-            auto& par = ev->particles[i];
-            auto& sim = par.sim;
-            auto& rec = par.rec;
-            TVector3 ps(sim.getMomentum().x,sim.getMomentum().y,sim.getMomentum().z);
-            TVector3 pr(rec.getMomentum().x,rec.getMomentum().y,rec.getMomentum().z);
 
-            if (i == 0) cout << endl;
-            if (i == 0) cout << setw(ww) << "i" << setw(ww) << "type" << setw(ww) << "PDG" << setw(ww) << "Collection" << setw(ww) << "P/E" << setw(ww) << "Pz/Z" << setw(ww) << "Pt/R" << setw(ww) << "eta" << setw(ww) << "phi" << endl;
-
-            cout << setw(ww) << i << setw(ww) << "Gen" << setw(ww) << sim.getPDG() << setw(ww) << sim.getObjectID().collectionID << setw(ww) << ps.Mag() << setw(ww) << ps.Pz() << setw(ww) << ps.Pt() << setw(ww) << ps.Eta() << setw(ww) << ps.Phi() << endl;
-            cout << setw(ww) << i << setw(ww) << "Rec" << setw(ww) << "" << setw(ww) << rec.getObjectID().collectionID << setw(ww) << pr.Mag() << setw(ww) << pr.Pz() << setw(ww) << pr.Pt() << setw(ww) << pr.Eta() << setw(ww) << pr.Phi() << endl;
-            for (unsigned int j = 0; j < par.tracks.size(); ++j)
-            {
-                auto& trk = par.tracks[j];
-                TVector3 p(trk.getMomentum().x,trk.getMomentum().y,trk.getMomentum().z);
-                cout << setw(ww) << i << setw(ww) << "Track" << setw(ww) << "" << setw(ww) << trk.getObjectID().collectionID << setw(ww) << p.Mag() << setw(ww) << p.Pz() << setw(ww) << p.Pt() << setw(ww) << p.Eta() << setw(ww) << p.Phi() << setw(ww) << endl;
-                for (unsigned int k = 0; k < trk.measurements_size(); ++k)
-                {
-                    auto hit = trk.getMeasurements(k);
-                    auto id = hit.getSurface();
-                    uint64_t volume = (id >> 56) & 0xFF;
-                    uint64_t boundary = (id >> 48) & 0xFF;
-                    uint64_t layer  = (id >> 36) & 0xFFF;
-                    uint64_t approach = (id >> 28) & 0xFF;
-                    uint64_t sensitive = (id >> 8) & 0xFFFFF;
-                    uint64_t extra = (id >> 0) & 0xFF;
-                    //cout << setw(ww) << i << setw(ww) << "Hit" << setw(2*ww) << hit.getSurface() << setw(ww) << hit.getLoc().a << setw(ww) << hit.getLoc().b << endl;
-                    //cout << setw(ww) << i << setw(ww) << "Hit" << setw(ww) << hit.hits_size() << endl;
-                    //cout << setw(ww) << i << setw(ww) << "Hit" << setw(2*ww) << id << setw(ww) << volume << setw(ww) << boundary << setw(ww) << layer << setw(ww) << approach << setw(ww) << sensitive << setw(ww) << extra << endl;
-                    cout << setw(ww) << i << setw(ww) << "Hit" << setw(ww) << extra << endl;
-                }
-            }
-            for (unsigned int j = 0; j < par.tracks_tagger.size(); ++j)
-            {
-                auto& trk = par.tracks_tagger[j];
-                TVector3 p(trk.getMomentum().x,trk.getMomentum().y,trk.getMomentum().z);
-                cout << setw(ww) << i << setw(ww) << "TagTrk" << setw(ww) << "" << setw(ww) << trk.getObjectID().collectionID << setw(ww) << p.Mag() << setw(ww) << p.Pz() << setw(ww) << p.Pt() << setw(ww) << p.Eta() << setw(ww) << p.Phi() << endl;
-                for (unsigned int k = 0; k < trk.measurements_size(); ++k)
-                {
-                    auto hit = trk.getMeasurements(k);
-                    auto id = hit.getSurface();
-                    uint64_t extra = (id >> 0) & 0xFF;
-                    cout << setw(ww) << i << setw(ww) << "Hit" << setw(ww) << extra << endl;
-                }
-            }
-            for (unsigned int j = 0; j < par.clusters.size(); ++j)
-            {
-                auto& c = par.clusters[j];
-                TVector3 pos(c.getPosition().x,c.getPosition().y,c.getPosition().z);
-                cout << setw(ww) << i << setw(ww) << "Cluster" << setw(ww) << "" << setw(ww) << c.getObjectID().collectionID << setw(ww) << c.getEnergy() << setw(ww) << pos.Z() << setw(ww) << pos.Perp() << setw(ww) << pos.Eta() << setw(ww) << pos.Phi() << setw(ww) << par.nhits << endl;
-            }
-            for (unsigned int j = 0; j < par.hclusters.size(); ++j)
-            {
-                auto& c = par.hclusters[j];
-                TVector3 pos(c.getPosition().x,c.getPosition().y,c.getPosition().z);
-                cout << setw(ww) << i << setw(ww) << "HCluster" << setw(ww) << "" << setw(ww) << c.getObjectID().collectionID << setw(ww) << c.getEnergy() << setw(ww) << pos.Z() << setw(ww) << pos.Perp() << setw(ww) << pos.Eta() << setw(ww) << pos.Phi() << setw(ww) << par.nhits << endl;
-            }
-        }
-
-    }
-
+template <typename T>
+void print_vector(const vector<T>& vec, int ww)
+{
+    for (const auto& x : vec) cout << setw(ww) << x;
+    cout << endl;
 }

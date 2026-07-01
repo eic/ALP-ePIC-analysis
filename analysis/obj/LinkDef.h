@@ -8,8 +8,6 @@
 #pragma link C++ class std::vector<MyEvent>+;
 #pragma link C++ class MyGeneratedParticle+;
 #pragma link C++ class std::vector<MyGeneratedParticle>+;
-#pragma link C++ class MyParticle+;
-#pragma link C++ class std::vector<MyParticle>+;
 #pragma link C++ class MyReconstructedParticle+;
 #pragma link C++ class std::vector<MyReconstructedParticle>+;
 #pragma link C++ class MySelectionCriteria+;
